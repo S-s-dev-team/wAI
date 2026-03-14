@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8081:8080"
+    environment:
+      SWAGGER_JSON: /spec/openapi.yaml
+    volumes:
+      - ./openapi/openapi.yaml:/spec/openapi.yaml:ro
+    networks:
+      - lesson
+
+networks:
+  lesson:

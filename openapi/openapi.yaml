@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: wAI API
+  description: wAI
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: Apache 2.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: https://api.example.com
+    description: Production
+
+paths:
+  /health:
+    get:
+      summary: ヘルスチェック
+      description: アプリケーションのヘルスステータスを確認します
+      tags:
+        - health
+      operationId: healthCheck
+      responses:
+        "200":
+          description: 正常なレスポンス
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: サービス利用不可
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          description: ヘルスステータス
+          example: healthy
+          enum:
+            - healthy
+            - unhealthy
+        timestamp:
+          type: string
+          format: date-time
+          description: レスポンスの時刻
+          example: "2026-03-14T10:00:00Z"
+        version:
+          type: string
+          description: API バージョン
+          example: 1.0.0
