@@ -3,6 +3,8 @@ name: Update ER Diagram
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - "backend/cmd/server/migrations/**"
 
