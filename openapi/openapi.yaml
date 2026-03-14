@@ -14,7 +14,33 @@ servers:
   - url: https://api.example.com
     description: Production
 
+security:
+  - BearerAuth: []
+
 paths:
+  /login:
+    post:
+      summary: ログイン
+      description: Firebase ID Token を検証し、ユーザーを登録または取得します
+      tags:
+        - auth
+      operationId: login
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /health:
     get:
       summary: ヘルスチェック
@@ -22,6 +48,7 @@ paths:
       tags:
         - health
       operationId: healthCheck
+      security: []
       responses:
         "200":
           description: 正常なレスポンス
@@ -37,7 +64,52 @@ paths:
                 $ref: "#/components/schemas/HealthResponse"
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Firebase ID Token
+
   schemas:
+    LoginResponse:
+      type: object
+      required:
+        - id
+        - firebase_uid
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ユーザーID
+        firebase_uid:
+          type: string
+          description: Firebase UID
+        email:
+          type: string
+          description: メールアドレス
+        display_name:
+          type: string
+          description: 表示名
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+
     HealthResponse:
       type: object
       required:
