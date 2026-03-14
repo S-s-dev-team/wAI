@@ -1,0 +1,2 @@
+dsn: postgres://postgres:postgres@localhost:5432/app?sslmode=disable
+docPath: docs/er
