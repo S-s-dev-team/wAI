@@ -1,9 +1,9 @@
-DC := docker-compose
+DC := docker compose
 
 # ---------- Docker ----------
 .PHONY: up down ps
 
-up: ## Docker環境を起動（サーバー + Swagger UI）
+up: ## Docker環境を起動（PostgreSQL + Swagger UI）
 	@$(DC) up -d
 
 down: ## Docker環境を停止
@@ -35,11 +35,29 @@ docs-up: ## Swagger UIを起動（http://localhost:8081）
 docs-down: ## Swagger UIを停止
 	@$(DC) stop swagger-ui
 
+# ---------- Database ----------
+.PHONY: db migrate erd schema
+
+db: ## PostgreSQLを起動して準備完了を待つ
+	@$(DC) up -d postgres
+	@echo "Waiting for PostgreSQL to be ready..."
+	@until $(DC) exec -T postgres pg_isready -U postgres > /dev/null 2>&1; do sleep 1; done
+	@echo "PostgreSQL is ready."
+
+migrate: ## マイグレーションを実行
+	@cat backend/cmd/server/migrations/*.sql | $(DC) exec -T postgres psql -U postgres -d app
+
+erd: ## tbls で ERD を生成
+	@tbls doc --force
+
+schema: db migrate erd ## DB起動 → マイグレーション → ERD生成を一括実行
+
 # ---------- Local Development ----------
-.PHONY: server swagger
+.PHONY: server clean
 
 server: ## サーバーのみ起動（ローカル開発）
 	@cd backend && go run ./cmd/server
 
-swagger: ## Swagger UIのみ起動（ローカル開発）
-	@python3 -m http.server 8081 --directory openapi
+clean: ## Docker環境を停止してボリュームも削除
+	@$(DC) down -v
+	

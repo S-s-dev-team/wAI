@@ -1,0 +1,55 @@
+name: Update ER Diagram
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/cmd/server/migrations/**"
+
+permissions:
+  contents: write
+
+jobs:
+  generate-er-diagram:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tbls
+        run: |
+          TBLS_VERSION=$(curl -sL -o /dev/null -w '%{url_effective}' https://github.com/k1LoW/tbls/releases/latest | grep -o '[^/]*$')
+          curl -sL "https://github.com/k1LoW/tbls/releases/download/${TBLS_VERSION}/tbls_${TBLS_VERSION}_linux_amd64.tar.gz" | tar xz
+          sudo mv tbls /usr/local/bin/
+
+      - name: Run migration
+        run: cat backend/cmd/server/migrations/*.sql | psql postgres://postgres:postgres@localhost:5432/app?sslmode=disable
+
+      - name: Generate ER diagram
+        run: make erd
+
+      - name: Commit and push if changed
+        run: |
+          git add docs/er/
+          git diff --cached --quiet && exit 0
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git commit -m "docs: update ER diagram"
+          git push
