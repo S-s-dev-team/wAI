@@ -43,6 +43,7 @@ components:
       required:
         - status
         - timestamp
+        - version
       properties:
         status:
           type: string
