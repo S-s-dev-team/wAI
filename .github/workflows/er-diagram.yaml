@@ -45,9 +45,9 @@ jobs:
 
       - name: Commit and push if changed
         run: |
-          git diff --quiet docs/er/ && exit 0
+          git add docs/er/
+          git diff --cached --quiet && exit 0
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add docs/er/
-          git commit -m "update ER diagram"
+          git commit -m "docs: update ER diagram"
           git push
