@@ -1,0 +1,3 @@
+CREATE TABLE users (
+    id STRING PRIMARY KEY
+);
