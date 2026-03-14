@@ -32,7 +32,7 @@ type HealthResponse struct {
 	Timestamp time.Time `json:"timestamp"`
 
 	// Version API バージョン
-	Version *string `json:"version,omitempty"`
+	Version string `json:"version"`
 }
 
 // HealthResponseStatus ヘルスステータス
@@ -94,17 +94,17 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7xTwU4UQRD9lU3pcdgZFjWkbxsvbuKBqCfJHtregh2cmW67e0BC9jDTieFCNGqCHLzg",
-	"AUWFGGJc1OjHtAt+humeAXZXvJrMoaZTVe/Vq1cbwHgqeIaZVkA2QLE+ptSHt5Amun8HleCZQvciJBco",
-	"dYxVqqY691EPFZOx0DHPgIA1r6x5b8tj95kn1ny35U9bHkMAmOUpkEXo+9brEECencXdAPAxTUWCQMYS",
-	"9LpwD0rLOFuGQQA6TlFpmorLkD94zNfWHLmgODjZKUeb32C8dStq3ZiJ5mZmr92bjUjkvvsQwBKXKdVA",
-	"oEc1zjiQy8BXUSqPNQ3dXug0rHnmhx1as2fN0QTqbDNqRn93HAQg8VEeS+w5XWpJx4fsntfwByvINAxc",
-	"UZwtcUeC8UxTpl2Y0RRrIndzIbjUjvAky7V2BwJIYob1Rs+KBGV9bLSaUaWw9pzX2p1Ge8FVnI9dzzEI",
-	"gAvMqIiBwFw9mqC67+0QVttz4TLqS9ZU7lqzbc2+LT95wb5Ugtni4F/eseXz092vv/e3bLFtix+22AFP",
-	"QVLXs9MDUtv1Zh/ZQ3CqVrb1hFpRdCYWZp4QFSKJmS8OV1S10Mr6LroqcQkIXAkvbiOsDyOcugq/jcnx",
-	"Tj6+GQ2HttifsqNT7Xo09x+Z2PKzU9C8sOXxaPPd6cu3v4Zbo6eH3ncqT1Mq1ycO1hS23LPG2PLQmZAu",
-	"q4trha5HUCidG4AsTq/1Nmc0afRwFRMuUjdeALlM3DVrLUgYJi6hz5Um89G8M9F0hwXJeznzP+OlioQh",
-	"FXGzvqYm4ykMuoM/AQAA//8ykExquwQAAA==",
+	"H4sIAAAAAAAC/7xTMW8TTRD9K9Z8X3nxXRxA0XYWDZYoIqAicrGsJ/GFu9tldy8hilzcrYTSRCBACilo",
+	"QhEIkAhFCAcQ/JjFCT8D7d6Z2Ca0SC7Gp515b968twWMp4JnmGkFZAsU62NKfXkDaaL7t1AJnil0X4Tk",
+	"AqWOsXqqqc591UPFZCx0zDMgYM0La97a8tT9zCNrvtryuy1PIQDM8hTIMvT96E0IIM/GdTcAfEhTkSCQ",
+	"iQd6U7gPSss4W4VBADpOUWmaisuQ33nMl9acuKI4OtsrR9tfYHJ0K2pdm4sW5uav3JmPSOR+dyGAFS5T",
+	"qoFAj2qccyCXga+jVB5rFrq91GlY88QvO7TmwJqTKdT5ZtSM/pw4CEDigzyW2HO61JJOLnmB2f3dze+t",
+	"IdMwcO1xtsIdHcYzTZl2ZUZTrCndzoXgUjvq03w32h0IIIkZ1rcdNwnK+thoNaNKa+3Zb7Q7jfZSZ4LM",
+	"eKNBAFxgRkUMBBbqJQXVfW+MsLqjK1dRX3Kwct+aXWsObfnBS/epks4WR39zkS2fnu9//nm4Y4tdW3yz",
+	"xR54CpK6mZ0ekNq41/vI7oPTtzKwJ9SKorFYmHlCVIgkZr45XFPVaasQuOp/iStA4L/wIiVhHZFwJh/+",
+	"GtPrnb1/NRoObXE4Y0yn2tVo4R8yseVHp6B5ZsvT0fab8+evfwx3Ro+PvQNVnqZUbk5F1xS2PLDG2PLY",
+	"2ZGuqovcQtcjKJTODUCWZ896kzOaNHq4jgkXqVsvgFwmLtdaCxKGiXvQ50qTxWjRmWh2wpLkvZz5P5Ot",
+	"ioQhFXGzzlWT8RQG3cGvAAAA///WEKuFxQQAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
