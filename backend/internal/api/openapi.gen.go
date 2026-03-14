@@ -94,17 +94,17 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7xTQU8UTRD9K5v6vuOwMyxqSN+IF0k8EPUk2UPbWzCDM9Ntdw9KyB5mOjFciEZNkIMX",
-	"PKCoEEOMixr9Me2CP8N0zyzsrng12UPtpKveq1fvbQLjmeA55loB2QTFYsyoL28gTXV8C5XguUL3RUgu",
-	"UOoE66ea6sJXPVRMJkInPAcC1ry05p2tTtzPPLbmm61+2OoEAsC8yIAsQ+xHb0AART6quwHgI5qJFIGM",
-	"PdAbwn1QWib5KvQD0EmGStNMXIb83mO+subYFeXh6W413PoK46M7UefaTDQ3M3vlzmxEIve7CwGscJlR",
-	"DQR6VOOMA7kMfB2l8ljT0AtLiy1rnvplB9bsW3M8gTrbjtrRnxP7AUh8UCQSe06XRtLxJbvnPfzeGjIN",
-	"fdeU5CvckWA815RpV+Y0w4bI7UIILrUjPMny4YJjOTqPKW21b42x1VFrYWkRAkgThs2tR+MEZTG2Ou2o",
-	"1l77bdycuuNckGbDfgBcYE5FAgTmmqUF1bE3Sljf1ZWrqC85YLVnzY41B7b66KX8XEtpy8O/ucpWz872",
-	"vvw62Lblji2/23IXPAVJ3czFHpDGyNdjZPfB6V0b2hPqRNFIRsw9ISpEmjDfHK6p+tR1KFz1v8QVIPBf",
-	"eJGasIlMOJUXf6fJ9U4/vB4OBrY8mDKqU+1qNPcPmdjqk1PQPLfVyXDr7dmLNz8H28MnR96RqsgyKjcm",
-	"ojzmFWdPuqoucgxdj6BQOjcAWZ4+603OaNrq4TqmXGRuvQAKmbqcay1IGKbuQcyVJvPRvDPR9IQlyXsF",
-	"83/GWxUJQyqSdpOzNuMZ9Lv93wEAAP//ST70HtUEAAA=",
+	"H4sIAAAAAAAC/7xTwU4UQRD9lU3pcdgZFjWkbxsvbuKBqCfJHtregh2cmW67e0BC9jDTieFCNGqCHLzg",
+	"AUWFGGJc1OjHtAt+humeAXZXvJrMoaZTVe/Vq1cbwHgqeIaZVkA2QLE+ptSHt5Amun8HleCZQvciJBco",
+	"dYxVqqY691EPFZOx0DHPgIA1r6x5b8tj95kn1ny35U9bHkMAmOUpkEXo+9brEECencXdAPAxTUWCQMYS",
+	"9LpwD0rLOFuGQQA6TlFpmorLkD94zNfWHLmgODjZKUeb32C8dStq3ZiJ5mZmr92bjUjkvvsQwBKXKdVA",
+	"oEc1zjiQy8BXUSqPNQ3dXug0rHnmhx1as2fN0QTqbDNqRn93HAQg8VEeS+w5XWpJx4fsntfwByvINAxc",
+	"UZwtcUeC8UxTpl2Y0RRrIndzIbjUjvAky7V2BwJIYob1Rs+KBGV9bLSaUaWw9pzX2p1Ge8FVnI9dzzEI",
+	"gAvMqIiBwFw9mqC67+0QVttz4TLqS9ZU7lqzbc2+LT95wb5Ugtni4F/eseXz092vv/e3bLFtix+22AFP",
+	"QVLXs9MDUtv1Zh/ZQ3CqVrb1hFpRdCYWZp4QFSKJmS8OV1S10Mr6LroqcQkIXAkvbiOsDyOcugq/jcnx",
+	"Tj6+GQ2HttifsqNT7Xo09x+Z2PKzU9C8sOXxaPPd6cu3v4Zbo6eH3ncqT1Mq1ycO1hS23LPG2PLQmZAu",
+	"q4trha5HUCidG4AsTq/1Nmc0afRwFRMuUjdeALlM3DVrLUgYJi6hz5Um89G8M9F0hwXJeznzP+OlioQh",
+	"FXGzvqYm4ykMuoM/AQAA//8ykExquwQAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
