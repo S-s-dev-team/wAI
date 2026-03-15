@@ -6,11 +6,16 @@ import (
 
 	domain "github.com/S-s-dev-team/wAI/internal/domain/model"
 	"github.com/S-s-dev-team/wAI/registry"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+    log.Println(".env file not found")
+}
+
 	ctx := context.Background()
 
 	app, err := registry.InitializeApp(ctx)
