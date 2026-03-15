@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><title>Firebase Google Login - Token Test</title></head>
+<body>
+  <h2>Firebase Google Login</h2>
+  <button id="login">Google でログイン</button>
+  <h3>ID Token:</h3>
+  <textarea id="token" rows="10" cols="80" readonly></textarea>
+  <br><br>
+  <button id="copy" style="display:none">コピー</button>
+  <pre id="curl" style="display:none;background:#eee;padding:10px"></pre>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+    // ============================================================
+    // 使い方:
+    // 1. このファイルを auth-test.html にコピー
+    //    cp auth-test.example.html auth-test.html
+    // 2. 以下の値を Firebase コンソールから取得して書き換える
+    //    Firebase コンソール → プロジェクト設定 → 全般
+    //    - apiKey: ウェブ API キー
+    //    - projectId: プロジェクト ID
+    // 3. npx serve . で起動して http://localhost:3000/auth-test にアクセス
+    // ============================================================
+    const app = initializeApp({
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+    });
+    const auth = getAuth(app);
+
+    document.getElementById("login").addEventListener("click", async () => {
+      try {
+        const result = await signInWithPopup(auth, new GoogleAuthProvider());
+        const idToken = await result.user.getIdToken();
+        document.getElementById("token").value = idToken;
+        document.getElementById("copy").style.display = "inline";
+
+        const cmd = 'curl -X POST http://localhost:8080/login -H "Authorization: Bearer ' + idToken + '"';
+        document.getElementById("curl").textContent = cmd;
+        document.getElementById("curl").style.display = "block";
+      } catch (e) {
+        alert("エラー: " + e.message);
+      }
+    });
+
+    document.getElementById("copy").addEventListener("click", () => {
+      navigator.clipboard.writeText(document.getElementById("token").value);
+      alert("コピーしました");
+    });
+  </script>
+</body>
+</html>
