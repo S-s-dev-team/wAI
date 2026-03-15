@@ -311,7 +311,7 @@ class _Footer extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Text(
-        '© 2024 AI先輩. All rights reserved.',
+        '© ${DateTime.now().year} AI先輩. All rights reserved.',
         style: AppTextStyles.caption.copyWith(
           color: AppColors.textTertiary,
         ),
