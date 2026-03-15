@@ -105,9 +105,9 @@ export interface components {
             /** @description Firebase UID */
             firebase_uid: string;
             /** @description メールアドレス */
-            email?: string;
+            email: string;
             /** @description 表示名 */
-            display_name?: string;
+            display_name: string;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
