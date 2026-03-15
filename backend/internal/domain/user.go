@@ -8,12 +8,12 @@ import (
 )
 
 type User struct {
-	ID           uuid.UUID
-	FirebaseUID  string
-	Email        string
-	DisplayName  string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID          uuid.UUID `gorm:"primaryKey"`
+	FirebaseUID string    `gorm:"uniqueIndex;not null"`
+	Email       string    `gorm:"not null"`
+	DisplayName string    `gorm:"not null"`
+	CreatedAt   time.Time `gorm:"autoCreateTime"`
+	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 }
 
 type UserRepository interface {
