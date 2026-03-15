@@ -1,0 +1,10 @@
+# Secrets
+*.json
+!package.json
+.env
+
+# Tools (credentials embedded)
+tools/auth-test.html
+
+# Binary
+server
