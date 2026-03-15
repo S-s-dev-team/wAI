@@ -177,4 +177,10 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# Claude MCP local config (contains API tokens)
+.claude/mcp/mcp.json
+
+# JetBrains IDE
+.idea/
+
 # End of https://www.toptal.com/developers/gitignore/api/go,react,nextjs,terraform,flutter
