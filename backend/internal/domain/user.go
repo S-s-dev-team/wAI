@@ -17,6 +17,7 @@ type User struct {
 }
 
 type UserRepository interface {
-	UpsertUser(ctx context.Context, firebaseUID string, email, displayName *string) (*User, error)
-	GetUserByFirebaseUID(ctx context.Context, firebaseUID string) (*User, error)
+	Create(ctx context.Context, user *User) (*User, error)
+	GetByFirebaseUID(ctx context.Context, firebaseUID string) (*User, error)
+	Update(ctx context.Context, user *User) (*User, error)
 }
