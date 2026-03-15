@@ -96,6 +96,97 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /chats/{chatId}/messages:
+    get:
+      summary: メッセージ一覧
+      description: チャット内のメッセージ一覧を取得します
+      tags:
+        - messages
+      operationId: listMessages
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: 取得件数（デフォルト 50）
+          schema:
+            type: integer
+            default: 50
+        - name: before
+          in: query
+          description: このIDより前のメッセージを取得（カーソルページネーション）
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: メッセージ一覧
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageList"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: チャットが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      summary: メッセージ送信
+      description: ユーザーのメッセージを送信し、AI先輩からの応答を返します
+      tags:
+        - messages
+      operationId: sendMessage
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "201":
+          description: メッセージ送信成功（AI応答を含む）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+        "400":
+          description: リクエスト不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: チャットが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /health:
     get:
       summary: ヘルスチェック
@@ -269,6 +360,74 @@ components:
         annual_income:
           type: integer
           description: 年収（万円）
+
+    SendMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: ユーザーのメッセージ本文
+          example: 今の仕事に少し迷いがあって…毎日忙しいのですが、自分の成長が感じられなくて。
+
+    SendMessageResponse:
+      type: object
+      required:
+        - user_message
+        - replies
+      properties:
+        user_message:
+          $ref: "#/components/schemas/Message"
+        replies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+          description: AI先輩からの応答（複数の先輩が参加している場合は複数）
+
+    MessageList:
+      type: object
+      required:
+        - messages
+        - has_more
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+        has_more:
+          type: boolean
+          description: さらに古いメッセージが存在するか
+
+    Message:
+      type: object
+      required:
+        - id
+        - chat_id
+        - sender_type
+        - content
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        chat_id:
+          type: string
+          format: uuid
+        sender_type:
+          type: string
+          enum:
+            - user
+            - persona
+        persona:
+          $ref: "#/components/schemas/Persona"
+          description: 送信者がpersonaの場合の先輩情報
+        content:
+          type: string
+          description: メッセージ本文
+        created_at:
+          type: string
+          format: date-time
 
     HealthResponse:
       type: object
