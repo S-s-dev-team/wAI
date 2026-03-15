@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID `gorm:"primaryKey"`
+	ID          uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
 	FirebaseUID string    `gorm:"uniqueIndex;not null"`
 	Email       string    `gorm:"not null"`
 	DisplayName string    `gorm:"not null"`
