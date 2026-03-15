@@ -13,18 +13,22 @@ ps: ## Docker環境のステータスを表示
 	@$(DC) ps
 
 # ---------- Code Generation ----------
-.PHONY: gen gen-back gen-front
+.PHONY: gen gen-back gen-flutter
 
-gen: ## OpenAPI定義からコードを再生成（Go + TypeScript）
-	@$(MAKE) gen-back gen-front
+gen: ## OpenAPI定義からコードを再生成（Go + Flutter）
+	@$(MAKE) gen-back gen-flutter
 
 gen-back: ## OpenAPI定義からGoのサーバースタブを生成
 	@mkdir -p backend/internal/api
 	@oapi-codegen --config openapi/config.yaml openapi/openapi.yaml
 
-gen-front: ## OpenAPI定義からTypeScriptの型定義を生成
-	@mkdir -p frontend/src/lib
-	@cd frontend && npx openapi-typescript ../openapi/openapi.yaml -o src/lib/api-types.ts
+gen-flutter: ## OpenAPI定義からDart/DioのAPIクライアントを生成
+	@mkdir -p flutter/lib/api
+	@npx --yes @openapitools/openapi-generator-cli generate \
+		-i openapi/openapi.yaml \
+		-g dart-dio \
+		-o flutter/lib/api \
+		--additional-properties=pubName=wai_api,nullableFields=true
 
 # ---------- Swagger UI ----------
 .PHONY: docs-up docs-down
