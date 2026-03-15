@@ -41,6 +41,61 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /chats:
+    get:
+      summary: チャット一覧
+      description: ログインユーザーのチャット一覧を取得します
+      tags:
+        - chats
+      operationId: listChats
+      responses:
+        "200":
+          description: チャット一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chat"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      summary: チャット作成
+      description: カスタム先輩の情報と一緒にチャットを作成します
+      tags:
+        - chats
+      operationId: createChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChatRequest"
+      responses:
+        "201":
+          description: チャット作成成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chat"
+        "400":
+          description: リクエスト不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /health:
     get:
       summary: ヘルスチェック
@@ -109,6 +164,111 @@ components:
           type: integer
         message:
           type: string
+
+    CreateChatRequest:
+      type: object
+      required:
+        - persona
+      properties:
+        title:
+          type: string
+          description: チャットタイトル
+          example: キャリア相談
+        persona:
+          $ref: "#/components/schemas/CreatePersonaInput"
+
+    CreatePersonaInput:
+      type: object
+      required:
+        - name
+        - gender
+        - age
+        - occupation
+        - annual_income
+      properties:
+        name:
+          type: string
+          description: 先輩の名前
+          example: 分析・戦略先輩
+        gender:
+          type: string
+          description: 性別
+          example: 男性
+        age:
+          type: integer
+          description: 年齢
+          example: 35
+        occupation:
+          type: string
+          description: 職業
+          example: ITコンサルタント
+        annual_income:
+          type: integer
+          description: 年収（万円）
+          example: 800
+        system_prompt:
+          type: string
+          description: システムプロンプト
+
+    Chat:
+      type: object
+      required:
+        - id
+        - persona
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        persona:
+          $ref: "#/components/schemas/Persona"
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/Persona"
+          description: 参加中のプリセット先輩
+        last_message:
+          type: string
+          description: 最新メッセージのプレビュー
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Persona:
+      type: object
+      required:
+        - id
+        - persona_type
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        persona_type:
+          type: string
+          enum:
+            - custom
+            - preset
+        preset_key_id:
+          type: string
+          description: プリセットキー（preset の場合のみ）
+        name:
+          type: string
+        gender:
+          type: string
+        age:
+          type: integer
+        occupation:
+          type: string
+        annual_income:
+          type: integer
+          description: 年収（万円）
 
     HealthResponse:
       type: object
