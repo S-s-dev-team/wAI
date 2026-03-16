@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - "backend/cmd/server/migrations/**"
+      - "backend/migrations/**"
 
 permissions:
   contents: write
@@ -40,7 +40,7 @@ jobs:
           sudo mv tbls /usr/local/bin/
 
       - name: Run migration
-        run: cat backend/cmd/server/migrations/*.sql | psql postgres://postgres:postgres@localhost:5432/app?sslmode=disable
+        run: cat backend/migrations/*.sql | psql postgres://postgres:postgres@localhost:5432/app?sslmode=disable
 
       - name: Generate ER diagram
         run: make erd
