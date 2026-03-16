@@ -81,7 +81,6 @@ CREATE TABLE messages (
     )
 );
 
-
 -- 自己分析カテゴリ（マスタ）
 CREATE TABLE insight_categories (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
