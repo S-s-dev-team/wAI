@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/S-s-dev-team/wAI/internal/domain"
+	domain "github.com/S-s-dev-team/wAI/internal/domain/model"
 	"gorm.io/gorm"
 )
 

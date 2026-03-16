@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"firebase.google.com/go/v4/auth"
-	"github.com/S-s-dev-team/wAI/internal/domain"
+	domain "github.com/S-s-dev-team/wAI/internal/domain/model"
 )
 
 type Auth struct {
