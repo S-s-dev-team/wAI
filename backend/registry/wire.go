@@ -31,6 +31,7 @@ func InitializeApp(ctx context.Context) (*App, error) {
 		repository.NewAuth,
 		repository.NewUser,
 		repository.NewChat,
+		repository.NewPersona,
 		usecase.NewLogin,
 		usecase.NewChatUsecase,
 		handler.NewServer,
