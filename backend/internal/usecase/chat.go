@@ -8,24 +8,37 @@ import (
 )
 
 type ChatUsecase struct {
-	chatRepository domain.ChatRepository
+	chatRepository    domain.ChatRepository
+	personaRepository domain.PersonaRepository
 }
 
-func NewChatUsecase(chatRepository domain.ChatRepository) *ChatUsecase {
-	return &ChatUsecase{chatRepository: chatRepository}
+func NewChatUsecase(chatRepository domain.ChatRepository, personaRepository domain.PersonaRepository) *ChatUsecase {
+	return &ChatUsecase{
+		chatRepository:    chatRepository,
+		personaRepository: personaRepository,
+	}
 }
 
 type CreateChatInput struct {
-	UserID uuid.UUID
-	Title  string
+	UserID       uuid.UUID
+	Title        string
+	PersonaName  string
+	PersonaType  string
+	Age          int
+	Gender       string
+	Occupation   string
+	AnnualIncome int
+	SystemPrompt string
 }
 
 type ChatOutput struct {
-	Chat *domain.Chat
+	Chat    *domain.Chat
+	Persona *domain.Persona
 }
 
 type ChatListOutput struct {
-	Chats []*domain.Chat
+	Chats    []*domain.Chat
+	Personas map[uuid.UUID]*domain.Persona
 }
 
 func (u *ChatUsecase) Create(ctx context.Context, input CreateChatInput) (*ChatOutput, error) {
@@ -36,7 +49,22 @@ func (u *ChatUsecase) Create(ctx context.Context, input CreateChatInput) (*ChatO
 	if err != nil {
 		return nil, err
 	}
-	return &ChatOutput{Chat: chat}, nil
+
+	persona, err := u.personaRepository.Create(ctx, &domain.Persona{
+		ChatID:       chat.ID,
+		Name:         input.PersonaName,
+		PersonaType:  input.PersonaType,
+		Age:          input.Age,
+		Gender:       input.Gender,
+		Occupation:   input.Occupation,
+		AnnualIncome: input.AnnualIncome,
+		SystemPrompt: input.SystemPrompt,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &ChatOutput{Chat: chat, Persona: persona}, nil
 }
 
 func (u *ChatUsecase) GetByID(ctx context.Context, id uuid.UUID) (*ChatOutput, error) {
@@ -44,7 +72,8 @@ func (u *ChatUsecase) GetByID(ctx context.Context, id uuid.UUID) (*ChatOutput, e
 	if err != nil {
 		return nil, err
 	}
-	return &ChatOutput{Chat: chat}, nil
+	persona, _ := u.personaRepository.GetByChatID(ctx, id)
+	return &ChatOutput{Chat: chat, Persona: persona}, nil
 }
 
 func (u *ChatUsecase) ListByUserID(ctx context.Context, userID uuid.UUID) (*ChatListOutput, error) {
@@ -52,5 +81,14 @@ func (u *ChatUsecase) ListByUserID(ctx context.Context, userID uuid.UUID) (*Chat
 	if err != nil {
 		return nil, err
 	}
-	return &ChatListOutput{Chats: chats}, nil
+
+	personas := make(map[uuid.UUID]*domain.Persona)
+	for _, c := range chats {
+		p, _ := u.personaRepository.GetByChatID(ctx, c.ID)
+		if p != nil {
+			personas[c.ID] = p
+		}
+	}
+
+	return &ChatListOutput{Chats: chats, Personas: personas}, nil
 }
