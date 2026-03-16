@@ -28,9 +28,21 @@ func (s *Server) CreateChat(ctx echo.Context) error {
 		title = *req.Title
 	}
 
+	systemPrompt := ""
+	if req.Persona.SystemPrompt != nil {
+		systemPrompt = *req.Persona.SystemPrompt
+	}
+
 	output, err := s.chatUC.Create(ctx.Request().Context(), usecase.CreateChatInput{
-		UserID: user.ID,
-		Title:  title,
+		UserID:       user.ID,
+		Title:        title,
+		PersonaName:  req.Persona.Name,
+		PersonaType:  "custom",
+		Age:          req.Persona.Age,
+		Gender:       req.Persona.Gender,
+		Occupation:   req.Persona.Occupation,
+		AnnualIncome: req.Persona.AnnualIncome,
+		SystemPrompt: systemPrompt,
 	})
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{
@@ -39,12 +51,7 @@ func (s *Server) CreateChat(ctx echo.Context) error {
 		})
 	}
 
-	return ctx.JSON(http.StatusCreated, api.Chat{
-		Id:        openapi_types.UUID(output.Chat.ID),
-		Title:     &title,
-		CreatedAt: output.Chat.CreatedAt,
-		UpdatedAt: output.Chat.UpdatedAt,
-	})
+	return ctx.JSON(http.StatusCreated, chatToResponse(output))
 }
 
 func (s *Server) ListChats(ctx echo.Context) error {
@@ -64,13 +71,55 @@ func (s *Server) ListChats(ctx echo.Context) error {
 	chats := make([]api.Chat, len(output.Chats))
 	for i, c := range output.Chats {
 		title := c.Title
-		chats[i] = api.Chat{
+		chat := api.Chat{
 			Id:        openapi_types.UUID(c.ID),
 			Title:     &title,
 			CreatedAt: c.CreatedAt,
 			UpdatedAt: c.UpdatedAt,
 		}
+		if p, ok := output.Personas[c.ID]; ok {
+			age := p.Age
+			income := p.AnnualIncome
+			gender := p.Gender
+			occupation := p.Occupation
+			chat.Persona = api.Persona{
+				Id:           openapi_types.UUID(p.ID),
+				Name:         p.Name,
+				PersonaType:  api.PersonaPersonaType(p.PersonaType),
+				Age:          &age,
+				AnnualIncome: &income,
+				Gender:       &gender,
+				Occupation:   &occupation,
+			}
+		}
+		chats[i] = chat
 	}
 
 	return ctx.JSON(http.StatusOK, chats)
+}
+
+func chatToResponse(output *usecase.ChatOutput) api.Chat {
+	title := output.Chat.Title
+	chat := api.Chat{
+		Id:        openapi_types.UUID(output.Chat.ID),
+		Title:     &title,
+		CreatedAt: output.Chat.CreatedAt,
+		UpdatedAt: output.Chat.UpdatedAt,
+	}
+	if output.Persona != nil {
+		age := output.Persona.Age
+		income := output.Persona.AnnualIncome
+		gender := output.Persona.Gender
+		occupation := output.Persona.Occupation
+		chat.Persona = api.Persona{
+			Id:           openapi_types.UUID(output.Persona.ID),
+			Name:         output.Persona.Name,
+			PersonaType:  api.PersonaPersonaType(output.Persona.PersonaType),
+			Age:          &age,
+			AnnualIncome: &income,
+			Gender:       &gender,
+			Occupation:   &occupation,
+		}
+	}
+	return chat
 }
