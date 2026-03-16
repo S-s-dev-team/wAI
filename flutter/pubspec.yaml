@@ -39,6 +39,7 @@ dependencies:
   # OpenAPI generated client
   wai_api:
     path: packages/wai_api
+  firebase_auth: ^6.2.0
 
 dev_dependencies:
   flutter_test:
