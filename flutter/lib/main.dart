@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'api/lib/src/api.dart';
+import 'package:wai_api/wai_api.dart';
 
 final api = WaiApi(
   basePathOverride: 'http://10.0.2.2:4010',

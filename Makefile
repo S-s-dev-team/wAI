@@ -29,6 +29,7 @@ gen-flutter: ## OpenAPI定義からDart/DioのAPIクライアントを生成
 		-g dart-dio \
 		-o flutter/packages/wai_api \
 		--additional-properties=pubName=wai_api,nullableFields=true
+	@cd flutter/packages/wai_api && dart pub get && dart run build_runner build --delete-conflicting-outputs
 
 # ---------- Swagger UI ----------
 .PHONY: docs-up docs-down
