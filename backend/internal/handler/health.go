@@ -2,30 +2,16 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/S-s-dev-team/wAI/internal/api"
-	"github.com/S-s-dev-team/wAI/internal/usecase"
 	"github.com/labstack/echo/v4"
 )
 
-type Health struct {
-	usecase *usecase.Health
-}
-
-func NewHealth(uc *usecase.Health) *Health {
-	return &Health{usecase: uc}
-}
-
-func (h *Health) Handle(ctx echo.Context) error {
-	output, err := h.usecase.Execute(ctx.Request().Context())
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{
-			Code:    500,
-			Message: "health check failed",
-		})
-	}
-
+func (s *Server) HealthCheck(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, api.HealthResponse{
-		Status: output.Status,
+		Status:    api.Healthy,
+		Timestamp: time.Now(),
+		Version:   "1.0.0",
 	})
 }
