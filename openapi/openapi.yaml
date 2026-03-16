@@ -222,6 +222,8 @@ components:
       required:
         - id
         - firebase_uid
+        - email
+        - display_name
         - created_at
         - updated_at
       properties:

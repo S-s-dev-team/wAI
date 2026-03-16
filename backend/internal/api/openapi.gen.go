@@ -8,6 +8,7 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"net/url"
 	"path"
 	"strings"
@@ -15,6 +16,12 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
+)
+
+const (
+	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
 // Defines values for HealthResponseStatus.
@@ -22,6 +29,68 @@ const (
 	Healthy   HealthResponseStatus = "healthy"
 	Unhealthy HealthResponseStatus = "unhealthy"
 )
+
+// Defines values for MessageSenderType.
+const (
+	MessageSenderTypePersona MessageSenderType = "persona"
+	MessageSenderTypeUser    MessageSenderType = "user"
+)
+
+// Defines values for PersonaPersonaType.
+const (
+	Custom PersonaPersonaType = "custom"
+	Preset PersonaPersonaType = "preset"
+)
+
+// Chat defines model for Chat.
+type Chat struct {
+	CreatedAt time.Time          `json:"created_at"`
+	Id        openapi_types.UUID `json:"id"`
+
+	// LastMessage 最新メッセージのプレビュー
+	LastMessage *string `json:"last_message,omitempty"`
+
+	// Participants 参加中のプリセット先輩
+	Participants *[]Persona `json:"participants,omitempty"`
+	Persona      Persona    `json:"persona"`
+	Title        *string    `json:"title,omitempty"`
+	UpdatedAt    time.Time  `json:"updated_at"`
+}
+
+// CreateChatRequest defines model for CreateChatRequest.
+type CreateChatRequest struct {
+	Persona CreatePersonaInput `json:"persona"`
+
+	// Title チャットタイトル
+	Title *string `json:"title,omitempty"`
+}
+
+// CreatePersonaInput defines model for CreatePersonaInput.
+type CreatePersonaInput struct {
+	// Age 年齢
+	Age int `json:"age"`
+
+	// AnnualIncome 年収（万円）
+	AnnualIncome int `json:"annual_income"`
+
+	// Gender 性別
+	Gender string `json:"gender"`
+
+	// Name 先輩の名前
+	Name string `json:"name"`
+
+	// Occupation 職業
+	Occupation string `json:"occupation"`
+
+	// SystemPrompt システムプロンプト
+	SystemPrompt *string `json:"system_prompt,omitempty"`
+}
+
+// ErrorResponse defines model for ErrorResponse.
+type ErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
 
 // HealthResponse defines model for HealthResponse.
 type HealthResponse struct {
@@ -38,16 +107,192 @@ type HealthResponse struct {
 // HealthResponseStatus ヘルスステータス
 type HealthResponseStatus string
 
+// LoginResponse defines model for LoginResponse.
+type LoginResponse struct {
+	CreatedAt time.Time `json:"created_at"`
+
+	// DisplayName 表示名
+	DisplayName string `json:"display_name"`
+
+	// Email メールアドレス
+	Email string `json:"email"`
+
+	// FirebaseUid Firebase UID
+	FirebaseUid string `json:"firebase_uid"`
+
+	// Id ユーザーID
+	Id        openapi_types.UUID `json:"id"`
+	UpdatedAt time.Time          `json:"updated_at"`
+}
+
+// Message defines model for Message.
+type Message struct {
+	ChatId openapi_types.UUID `json:"chat_id"`
+
+	// Content メッセージ本文
+	Content    string             `json:"content"`
+	CreatedAt  time.Time          `json:"created_at"`
+	Id         openapi_types.UUID `json:"id"`
+	Persona    *Persona           `json:"persona,omitempty"`
+	SenderType MessageSenderType  `json:"sender_type"`
+}
+
+// MessageSenderType defines model for Message.SenderType.
+type MessageSenderType string
+
+// MessageList defines model for MessageList.
+type MessageList struct {
+	// HasMore さらに古いメッセージが存在するか
+	HasMore  bool      `json:"has_more"`
+	Messages []Message `json:"messages"`
+}
+
+// Persona defines model for Persona.
+type Persona struct {
+	Age *int `json:"age,omitempty"`
+
+	// AnnualIncome 年収（万円）
+	AnnualIncome *int               `json:"annual_income,omitempty"`
+	Gender       *string            `json:"gender,omitempty"`
+	Id           openapi_types.UUID `json:"id"`
+	Name         string             `json:"name"`
+	Occupation   *string            `json:"occupation,omitempty"`
+	PersonaType  PersonaPersonaType `json:"persona_type"`
+
+	// PresetKeyId プリセットキー（preset の場合のみ）
+	PresetKeyId *string `json:"preset_key_id,omitempty"`
+}
+
+// PersonaPersonaType defines model for Persona.PersonaType.
+type PersonaPersonaType string
+
+// SendMessageRequest defines model for SendMessageRequest.
+type SendMessageRequest struct {
+	// Content ユーザーのメッセージ本文
+	Content string `json:"content"`
+}
+
+// SendMessageResponse defines model for SendMessageResponse.
+type SendMessageResponse struct {
+	// Replies AI先輩からの応答（複数の先輩が参加している場合は複数）
+	Replies     []Message `json:"replies"`
+	UserMessage Message   `json:"user_message"`
+}
+
+// ListMessagesParams defines parameters for ListMessages.
+type ListMessagesParams struct {
+	// Limit 取得件数（デフォルト 50）
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Before このIDより前のメッセージを取得（カーソルページネーション）
+	Before *openapi_types.UUID `form:"before,omitempty" json:"before,omitempty"`
+}
+
+// CreateChatJSONRequestBody defines body for CreateChat for application/json ContentType.
+type CreateChatJSONRequestBody = CreateChatRequest
+
+// SendMessageJSONRequestBody defines body for SendMessage for application/json ContentType.
+type SendMessageJSONRequestBody = SendMessageRequest
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// チャット一覧
+	// (GET /chats)
+	ListChats(ctx echo.Context) error
+	// チャット作成
+	// (POST /chats)
+	CreateChat(ctx echo.Context) error
+	// メッセージ一覧
+	// (GET /chats/{chatId}/messages)
+	ListMessages(ctx echo.Context, chatId openapi_types.UUID, params ListMessagesParams) error
+	// メッセージ送信
+	// (POST /chats/{chatId}/messages)
+	SendMessage(ctx echo.Context, chatId openapi_types.UUID) error
 	// ヘルスチェック
 	// (GET /health)
 	HealthCheck(ctx echo.Context) error
+	// ログイン
+	// (POST /login)
+	Login(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// ListChats converts echo context to params.
+func (w *ServerInterfaceWrapper) ListChats(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ListChats(ctx)
+	return err
+}
+
+// CreateChat converts echo context to params.
+func (w *ServerInterfaceWrapper) CreateChat(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.CreateChat(ctx)
+	return err
+}
+
+// ListMessages converts echo context to params.
+func (w *ServerInterfaceWrapper) ListMessages(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "chatId" -------------
+	var chatId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chatId", ctx.Param("chatId"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter chatId: %s", err))
+	}
+
+	ctx.Set(BearerAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListMessagesParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.ListMessages(ctx, chatId, params)
+	return err
+}
+
+// SendMessage converts echo context to params.
+func (w *ServerInterfaceWrapper) SendMessage(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "chatId" -------------
+	var chatId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chatId", ctx.Param("chatId"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter chatId: %s", err))
+	}
+
+	ctx.Set(BearerAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.SendMessage(ctx, chatId)
+	return err
 }
 
 // HealthCheck converts echo context to params.
@@ -56,6 +301,17 @@ func (w *ServerInterfaceWrapper) HealthCheck(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.HealthCheck(ctx)
+	return err
+}
+
+// Login converts echo context to params.
+func (w *ServerInterfaceWrapper) Login(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.Login(ctx)
 	return err
 }
 
@@ -87,24 +343,55 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/chats", wrapper.ListChats)
+	router.POST(baseURL+"/chats", wrapper.CreateChat)
+	router.GET(baseURL+"/chats/:chatId/messages", wrapper.ListMessages)
+	router.POST(baseURL+"/chats/:chatId/messages", wrapper.SendMessage)
 	router.GET(baseURL+"/health", wrapper.HealthCheck)
+	router.POST(baseURL+"/login", wrapper.Login)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/7xTMW8TTRD9K9Z8X3nxXRxA0XYWDZYoIqAicrGsJ/GFu9tldy8hilzcrYTSRCBACilo",
-	"QhEIkAhFCAcQ/JjFCT8D7d6Z2Ca0SC7Gp515b968twWMp4JnmGkFZAsU62NKfXkDaaL7t1AJnil0X4Tk",
-	"AqWOsXqqqc591UPFZCx0zDMgYM0La97a8tT9zCNrvtryuy1PIQDM8hTIMvT96E0IIM/GdTcAfEhTkSCQ",
-	"iQd6U7gPSss4W4VBADpOUWmaisuQ33nMl9acuKI4OtsrR9tfYHJ0K2pdm4sW5uav3JmPSOR+dyGAFS5T",
-	"qoFAj2qccyCXga+jVB5rFrq91GlY88QvO7TmwJqTKdT5ZtSM/pw4CEDigzyW2HO61JJOLnmB2f3dze+t",
-	"IdMwcO1xtsIdHcYzTZl2ZUZTrCndzoXgUjvq03w32h0IIIkZ1rcdNwnK+thoNaNKa+3Zb7Q7jfZSZ4LM",
-	"eKNBAFxgRkUMBBbqJQXVfW+MsLqjK1dRX3Kwct+aXWsObfnBS/epks4WR39zkS2fnu9//nm4Y4tdW3yz",
-	"xR54CpK6mZ0ekNq41/vI7oPTtzKwJ9SKorFYmHlCVIgkZr45XFPVaasQuOp/iStA4L/wIiVhHZFwJh/+",
-	"GtPrnb1/NRoObXE4Y0yn2tVo4R8yseVHp6B5ZsvT0fab8+evfwx3Ro+PvQNVnqZUbk5F1xS2PLDG2PLY",
-	"2ZGuqovcQtcjKJTODUCWZ896kzOaNHq4jgkXqVsvgFwmLtdaCxKGiXvQ50qTxWjRmWh2wpLkvZz5P5Ot",
-	"ioQhFXGzzlWT8RQG3cGvAAAA///WEKuFxQQAAA==",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
