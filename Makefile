@@ -40,6 +40,15 @@ docs-up: ## Swagger UIを起動（http://localhost:8081）
 docs-down: ## Swagger UIを停止
 	@$(DC) stop swagger-ui
 
+# ---------- Mock Server ----------
+.PHONY: mock-up mock-down
+
+mock-up: ## Prism mock サーバーを起動（http://localhost:4010）
+	@$(DC) up -d prism
+
+mock-down: ## Prism mock サーバーを停止
+	@$(DC) stop prism
+
 # ---------- Database ----------
 .PHONY: db migrate erd schema
 
