@@ -23,11 +23,11 @@ gen-back: ## OpenAPI定義からGoのサーバースタブを生成
 	@oapi-codegen --config openapi/config.yaml openapi/openapi.yaml
 
 gen-flutter: ## OpenAPI定義からDart/DioのAPIクライアントを生成
-	@mkdir -p flutter/lib/api
+	@mkdir -p flutter/packages/wai_api
 	@npx --yes @openapitools/openapi-generator-cli generate \
 		-i openapi/openapi.yaml \
 		-g dart-dio \
-		-o flutter/lib/api \
+		-o flutter/packages/wai_api \
 		--additional-properties=pubName=wai_api,nullableFields=true
 
 # ---------- Swagger UI ----------
