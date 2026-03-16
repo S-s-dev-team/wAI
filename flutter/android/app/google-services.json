@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "887016287518",
+    "project_id": "ss-wai-eb7ec",
+    "storage_bucket": "ss-wai-eb7ec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887016287518:android:c7824495202e0b20736d0f",
+        "android_client_info": {
+          "package_name": "com.example.wai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrlpLbryUkv7YtpuhVHVvC-X4426tBWJs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
