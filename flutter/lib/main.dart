@@ -1,21 +1,12 @@
-
 import 'package:flutter/material.dart';
-import 'core/theme/theme.dart';
-import 'dev_preview.dart';
+import 'api/lib/src/api.dart';
+
+final api = WaiApi(
+  basePathOverride: 'http://10.0.2.2:4010',
+);
 
 void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'wAI',
-      theme: AppTheme.light,
-      home: const DevPreviewScreen(),
-    );
-  }
+  runApp(const MaterialApp(
+    home: Scaffold(body: Center(child: Text('wAI'))),
+  ));
 }
