@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
-import 'chat_plus_popup.dart';
+import 'chat_action_menu.dart';
 
 /// チャット画面下部の入力バー。
 ///
 /// テキストフィールドと送信ボタンで構成される。
 /// 送信ボタンは [controller] にテキストがある場合のみ有効になる。
-/// 「+」ボタンで [ChatPlusPopup] を表示する。
+/// 「+」ボタンで [ChatActionMenu] を表示する。
 class ChatInputBar extends StatefulWidget {
   const ChatInputBar({
     super.key,
@@ -47,7 +47,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
       _popupEntry = null;
       return;
     }
-    _popupEntry = ChatPlusPopup.show(
+    _popupEntry = ChatActionMenu.show(
       context: context,
       layerLink: _plusLayerLink,
       onAddSenior: () {

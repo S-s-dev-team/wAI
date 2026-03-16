@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@stoplight/prism-cli": "^5.14.2"
+  },
+  "scripts": {
+    "mock": "prism mock ./openapi/openapi.yaml"
+  }
+}

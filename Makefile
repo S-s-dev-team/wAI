@@ -13,18 +13,31 @@ ps: ## Docker環境のステータスを表示
 	@$(DC) ps
 
 # ---------- Code Generation ----------
-.PHONY: gen gen-back gen-front
+.PHONY: gen gen-back gen-flutter gen-web
 
-gen: ## OpenAPI定義からコードを再生成（Go + TypeScript）
-	@$(MAKE) gen-back gen-front
+gen: ## OpenAPI定義からコードを再生成（Go + Flutter + Web）
+	@$(MAKE) gen-back gen-flutter gen-web
 
 gen-back: ## OpenAPI定義からGoのサーバースタブを生成
 	@mkdir -p backend/internal/api
 	@oapi-codegen --config openapi/config.yaml openapi/openapi.yaml
 
-gen-front: ## OpenAPI定義からTypeScriptの型定義を生成
-	@mkdir -p frontend/src/lib
-	@cd frontend && npx openapi-typescript ../openapi/openapi.yaml -o src/lib/api-types.ts
+gen-flutter: ## OpenAPI定義からDart/DioのAPIクライアントを生成
+	@mkdir -p flutter/packages/wai_api
+	@npx --yes @openapitools/openapi-generator-cli generate \
+		-i openapi/openapi.yaml \
+		-g dart-dio \
+		-o flutter/packages/wai_api \
+		--additional-properties=pubName=wai_api,nullableFields=true
+	@cd flutter/packages/wai_api && dart pub get && dart run build_runner build --delete-conflicting-outputs
+
+gen-web: ## OpenAPI定義からTypeScript FetchのAPIクライアントを生成
+	@mkdir -p web/packages/wai-api
+	@npx --yes @openapitools/openapi-generator-cli generate \
+		-i openapi/openapi.yaml \
+		-g typescript-fetch \
+		-o web/packages/wai-api \
+		--additional-properties=npmName=wai-api,npmVersion=0.0.1,supportsES6=true
 
 # ---------- Swagger UI ----------
 .PHONY: docs-up docs-down
@@ -34,6 +47,15 @@ docs-up: ## Swagger UIを起動（http://localhost:8081）
 
 docs-down: ## Swagger UIを停止
 	@$(DC) stop swagger-ui
+
+# ---------- Mock Server ----------
+.PHONY: mock-up mock-down
+
+mock-up: ## Prism mock サーバーを起動（http://localhost:4010）
+	@$(DC) up -d prism
+
+mock-down: ## Prism mock サーバーを停止
+	@$(DC) stop prism
 
 # ---------- Database ----------
 .PHONY: db migrate erd schema

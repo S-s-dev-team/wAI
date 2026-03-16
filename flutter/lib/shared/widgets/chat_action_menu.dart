@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 
-/// ChatInputBar の「+」ボタンに紐づくフローティングポップアップメニュー。
+/// ChatInputBar の「+」ボタンに紐づくフローティングアクションメニュー。
 ///
-/// [ChatPlusPopup.show] で表示、タップアウト or アイテム選択で閉じる。
-class ChatPlusPopup extends StatelessWidget {
-  const ChatPlusPopup({
+/// [ChatActionMenu.show] で表示、タップアウト or アイテム選択で閉じる。
+class ChatActionMenu extends StatelessWidget {
+  const ChatActionMenu({
     super.key,
     required this.onAddSenior,
     required this.onUpdateAnalysis,
@@ -18,7 +18,7 @@ class ChatPlusPopup extends StatelessWidget {
   final VoidCallback onDismiss;
 
   /// [layerLink] に `CompositedTransformTarget` を貼った「+」ボタンの
-  /// 真上にポップアップを表示し、OverlayEntry を返す。
+  /// 真上にメニューを表示し、OverlayEntry を返す。
   static OverlayEntry show({
     required BuildContext context,
     required LayerLink layerLink,
@@ -45,11 +45,11 @@ class ChatPlusPopup extends StatelessWidget {
                 followerAnchor: Alignment.bottomLeft,
                 offset: const Offset(0, -8),
                 child: GestureDetector(
-                  // ポップアップ自体のタップが dismiss に伝播しないよう吸収
+                  // メニュー自体のタップが dismiss に伝播しないよう吸収
                   onTap: () {},
                   child: Material(
                     type: MaterialType.transparency,
-                    child: ChatPlusPopup(
+                    child: ChatActionMenu(
                       onAddSenior: () {
                         dismiss();
                         onAddSenior();
@@ -103,13 +103,13 @@ class ChatPlusPopup extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _PopupItem(
+            _MenuItem(
               icon: Icons.person_add_alt_1_rounded,
               label: '先輩を追加する',
               onTap: onAddSenior,
               showDivider: true,
             ),
-            _PopupItem(
+            _MenuItem(
               icon: Icons.psychology_outlined,
               label: '自己分析を更新',
               onTap: onUpdateAnalysis,
@@ -122,8 +122,8 @@ class ChatPlusPopup extends StatelessWidget {
   }
 }
 
-class _PopupItem extends StatelessWidget {
-  const _PopupItem({
+class _MenuItem extends StatelessWidget {
+  const _MenuItem({
     required this.icon,
     required this.label,
     required this.onTap,

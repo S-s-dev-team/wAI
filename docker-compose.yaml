@@ -10,6 +10,16 @@ services:
     networks:
       - lesson
 
+  prism:
+    image: stoplight/prism:latest
+    ports:
+      - "4010:4010"
+    volumes:
+      - ./openapi/openapi.yaml:/spec/openapi.yaml:ro
+    command: mock /spec/openapi.yaml -h 0.0.0.0
+    networks:
+      - lesson
+
   postgres:
     image: postgres:16
     environment:

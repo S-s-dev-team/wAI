@@ -3,7 +3,7 @@ import '../../../core/theme/spacing.dart';
 import '../../../shared/widgets/app_primary_button.dart';
 import '../../../shared/widgets/mentor_option_card.dart';
 
-/// 「先輩を追加する」ポップアップに渡すメンター選択肢。
+/// 「先輩を追加する」ボトムシートに渡すメンター選択肢。
 class ChatMentorOption {
   const ChatMentorOption({
     required this.id,
@@ -18,12 +18,12 @@ class ChatMentorOption {
   final String description;
 }
 
-/// チャット画面の「+」タップ時に表示するボトムシートコンテンツ。
+/// チャット画面の「先輩を追加する」選択時に表示するボトムシートコンテンツ。
 ///
 /// [options] の中から1つ選択し、[onConfirm] でそのIDを返す。
-/// [showChatPlusPopup] ヘルパーでモーダルとして表示する。
-class ChatPlusPopup extends StatefulWidget {
-  const ChatPlusPopup({
+/// [showAddSeniorBottomSheet] ヘルパーでモーダルとして表示する。
+class AddSeniorBottomSheet extends StatefulWidget {
+  const AddSeniorBottomSheet({
     super.key,
     required this.options,
     required this.onConfirm,
@@ -35,10 +35,10 @@ class ChatPlusPopup extends StatefulWidget {
   final VoidCallback? onClose;
 
   @override
-  State<ChatPlusPopup> createState() => _ChatPlusPopupState();
+  State<AddSeniorBottomSheet> createState() => _AddSeniorBottomSheetState();
 }
 
-class _ChatPlusPopupState extends State<ChatPlusPopup> {
+class _AddSeniorBottomSheetState extends State<AddSeniorBottomSheet> {
   String? _selectedId;
 
   @override
@@ -104,8 +104,8 @@ class _ChatPlusPopupState extends State<ChatPlusPopup> {
   }
 }
 
-/// [ChatPlusPopup] をモーダルボトムシートとして表示するヘルパー。
-Future<void> showChatPlusPopup({
+/// [AddSeniorBottomSheet] をモーダルボトムシートとして表示するヘルパー。
+Future<void> showAddSeniorBottomSheet({
   required BuildContext context,
   required List<ChatMentorOption> options,
   required ValueChanged<String> onConfirm,
@@ -118,7 +118,7 @@ Future<void> showChatPlusPopup({
         top: Radius.circular(AppSpacing.radiusBottomSheet),
       ),
     ),
-    builder: (_) => ChatPlusPopup(
+    builder: (_) => AddSeniorBottomSheet(
       options: options,
       onConfirm: (id) {
         Navigator.of(context).pop();
