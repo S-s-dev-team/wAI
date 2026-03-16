@@ -35,7 +35,8 @@ func InitializeApp(ctx context.Context) (*App, error) {
 	userRepository := repository.NewUser(db)
 	login := usecase.NewLogin(authRepository, userRepository)
 	chatRepository := repository.NewChat(db)
-	chatUsecase := usecase.NewChatUsecase(chatRepository)
+	personaRepository := repository.NewPersona(db)
+	chatUsecase := usecase.NewChatUsecase(chatRepository, personaRepository)
 	server := handler.NewServer(authRepository, userRepository, login, chatUsecase)
 	genaiClient, err := GeminiAPIProvider(ctx, vars)
 	if err != nil {
