@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'core/router/router.dart';
 import 'core/theme/theme.dart';
-import 'features/auth/screens/login_screen.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -18,10 +18,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'AI先輩',
       theme: AppTheme.light,
-      home: const LoginScreen(),
+      routerConfig: router,
     );
   }
 }
