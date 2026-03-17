@@ -34,18 +34,19 @@ func InitializeApp(ctx context.Context) (*App, error) {
 	}
 	userRepository := repository.NewUser(db)
 	login := usecase.NewLogin(authRepository, userRepository)
-	handlerLogin := handler.NewLogin(login)
-	health := usecase.NewHealth()
-	handlerHealth := handler.NewHealth(health)
+	chatRepository := repository.NewChat(db)
+	personaRepository := repository.NewPersona(db)
+	chatUsecase := usecase.NewChatUsecase(chatRepository, personaRepository)
+	server := handler.NewServer(authRepository, userRepository, login, chatUsecase)
 	genaiClient, err := GeminiAPIProvider(ctx, vars)
 	if err != nil {
 		return nil, err
 	}
 	app := &App{
-		LoginHandler:  handlerLogin,
-		HealthHandler: handlerHealth,
-		DB:            db,
-		GenAI:         genaiClient,
+		Config: vars,
+		Server: server,
+		DB:     db,
+		GenAI:  genaiClient,
 	}
 	return app, nil
 }
@@ -53,8 +54,8 @@ func InitializeApp(ctx context.Context) (*App, error) {
 // wire.go:
 
 type App struct {
-	LoginHandler  *handler.Login
-	HealthHandler *handler.Health
-	DB            *gorm.DB
-	GenAI         *genai.Client
+	Config *config.Vars
+	Server *handler.Server
+	DB     *gorm.DB
+	GenAI  *genai.Client
 }

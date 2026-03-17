@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/S-s-dev-team/wAI/internal/api"
 	domain "github.com/S-s-dev-team/wAI/internal/domain/model"
 	"github.com/S-s-dev-team/wAI/registry"
 	"github.com/joho/godotenv"
@@ -13,8 +14,8 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-    log.Println(".env file not found")
-}
+		log.Println(".env file not found")
+	}
 
 	ctx := context.Background()
 
@@ -24,7 +25,7 @@ func main() {
 	}
 
 	// マイグレーション
-	if err := app.DB.AutoMigrate(&domain.User{}); err != nil {
+	if err := app.DB.AutoMigrate(&domain.User{}, &domain.Chat{}, &domain.Persona{}); err != nil {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
@@ -32,8 +33,8 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/health", app.HealthHandler.Handle)
-	e.POST("/login", app.LoginHandler.Handle)
+	// OpenAPI で定義された全ルートを登録
+	api.RegisterHandlers(e, app.Server)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

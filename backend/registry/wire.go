@@ -16,10 +16,10 @@ import (
 )
 
 type App struct {
-	LoginHandler  *handler.Login
-	HealthHandler *handler.Health
-	DB            *gorm.DB
-	GenAI         *genai.Client
+	Config *config.Vars
+	Server *handler.Server
+	DB     *gorm.DB
+	GenAI  *genai.Client
 }
 
 func InitializeApp(ctx context.Context) (*App, error) {
@@ -30,10 +30,11 @@ func InitializeApp(ctx context.Context) (*App, error) {
 		config.New,
 		repository.NewAuth,
 		repository.NewUser,
+		repository.NewChat,
+		repository.NewPersona,
 		usecase.NewLogin,
-		usecase.NewHealth,
-		handler.NewLogin,
-		handler.NewHealth,
+		usecase.NewChatUsecase,
+		handler.NewServer,
 		wire.Struct(new(App), "*"),
 	)
 	return nil, nil

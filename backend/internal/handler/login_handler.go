@@ -10,15 +10,7 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-type Login struct {
-	usecase *usecase.Login
-}
-
-func NewLogin(uc *usecase.Login) *Login {
-	return &Login{usecase: uc}
-}
-
-func (h *Login) Handle(ctx echo.Context) error {
+func (s *Server) Login(ctx echo.Context) error {
 	authHeader := ctx.Request().Header.Get("Authorization")
 	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 		return ctx.JSON(http.StatusUnauthorized, api.ErrorResponse{
@@ -28,7 +20,7 @@ func (h *Login) Handle(ctx echo.Context) error {
 	}
 	idToken := strings.TrimPrefix(authHeader, "Bearer ")
 
-	output, err := h.usecase.Execute(ctx.Request().Context(), usecase.LoginInput{
+	output, err := s.loginUC.Execute(ctx.Request().Context(), usecase.LoginInput{
 		IDToken: idToken,
 	})
 	if err != nil {
@@ -38,16 +30,12 @@ func (h *Login) Handle(ctx echo.Context) error {
 		})
 	}
 
-	email := output.User.Email
-	displayName := output.User.DisplayName
-	resp := api.LoginResponse{
+	return ctx.JSON(http.StatusOK, api.LoginResponse{
 		Id:          openapi_types.UUID(output.User.ID),
 		FirebaseUid: output.User.FirebaseUID,
-		Email:       email,
-		DisplayName: displayName,
+		Email:       output.User.Email,
+		DisplayName: output.User.DisplayName,
 		CreatedAt:   output.User.CreatedAt,
 		UpdatedAt:   output.User.UpdatedAt,
-	}
-
-	return ctx.JSON(http.StatusOK, resp)
+	})
 }
