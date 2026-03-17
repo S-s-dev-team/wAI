@@ -39,6 +39,7 @@ dependencies:
   # OpenAPI generated client
   wai_api:
     path: packages/wai_api
+  go_router: ^17.1.0
 
 dev_dependencies:
   flutter_test:
