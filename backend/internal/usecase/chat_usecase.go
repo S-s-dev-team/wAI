@@ -50,6 +50,12 @@ func (u *ChatUsecase) Create(ctx context.Context, input CreateChatInput) (*ChatO
 		return nil, err
 	}
 
+	//TODO(seba): ハンドラーからシステムプロンプトはnilでくる想定何だけど、ここでプロンプトをペルソナから作って欲しい。
+	// go tempalte packageとかを使ってpersona情報からプロンプトを作るみたいな。
+	//イメージとしては、persona構造体を渡すと、systemPrompを作ってくれる関数みたいなのを作るみたいな。
+
+	// generatedSystemPrompt := genPrompt(input.Persona) //どこかで関数作る
+
 	persona, err := u.personaRepository.Create(ctx, &domain.Persona{
 		ChatID:       chat.ID,
 		Name:         input.PersonaName,
@@ -58,7 +64,7 @@ func (u *ChatUsecase) Create(ctx context.Context, input CreateChatInput) (*ChatO
 		Gender:       input.Gender,
 		Occupation:   input.Occupation,
 		AnnualIncome: input.AnnualIncome,
-		SystemPrompt: input.SystemPrompt,
+		SystemPrompt: input.SystemPrompt, //generatedSystemPromptを入れる
 	})
 	if err != nil {
 		return nil, err
