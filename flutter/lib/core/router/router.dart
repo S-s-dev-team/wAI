@@ -1,14 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/notifiers/auth_notifier.dart';
-import '../../features/auth/providers.dart';
-import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/view_models/auth_view_model.dart';
+import '../../features/auth/views/login_page.dart';
 import '../../features/chat/presentation/chat_list_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  final authState = ref.watch(authViewModelProvider);
 
   return GoRouter(
     initialLocation: '/login',
@@ -27,7 +25,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/login',
-        builder: (context, state) => const _LoginPage(),
+        builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
         path: '/',
@@ -36,27 +34,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-
-class _LoginPage extends ConsumerWidget {
-  const _LoginPage();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-
-    ref.listen<AuthState>(authProvider, (prev, next) {
-      if (next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!)),
-        );
-      }
-    });
-
-    return LoginScreen(
-      isLoading: authState.isLoading,
-      onGoogleLogin: () {
-        ref.read(authProvider.notifier).signInWithGoogle();
-      },
-    );
-  }
-}

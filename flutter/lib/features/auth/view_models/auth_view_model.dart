@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wai_api/wai_api.dart';
 
-import '../services/auth_service.dart';
+import '../repositories/auth_repository.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -32,13 +31,26 @@ class AuthState {
   }
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  final AuthService _authService;
-  final WaiApi _api;
+// --- Providers ---
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepository();
+});
+
+final authViewModelProvider =
+    StateNotifierProvider<AuthViewModel, AuthState>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return AuthViewModel(repository);
+});
+
+// --- ViewModel ---
+
+class AuthViewModel extends StateNotifier<AuthState> {
+  final AuthRepository _repository;
   StreamSubscription<User?>? _authSub;
 
-  AuthNotifier(this._authService, this._api) : super(const AuthState()) {
-    _authSub = _authService.authStateChanges.listen(_onAuthStateChanged);
+  AuthViewModel(this._repository) : super(const AuthState()) {
+    _authSub = _repository.authStateChanges.listen(_onAuthStateChanged);
   }
 
   void _onAuthStateChanged(User? user) {
@@ -52,18 +64,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _authService.signInWithGoogle();
+      final user = await _repository.signInWithGoogle();
       if (user == null) {
-        // ユーザーがキャンセル
         state = state.copyWith(isLoading: false);
         return;
-      }
-
-      // Firebase IDトークンを取得してバックエンドAPIを呼び出す
-      final idToken = await _authService.getIdToken();
-      if (idToken != null) {
-        _api.setBearerAuth('BearerAuth', idToken);
-        await _api.getAuthApi().login();
       }
 
       state = state.copyWith(
@@ -84,7 +88,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> signOut() async {
-    await _authService.signOut();
+    await _repository.signOut();
     state = state.copyWith(status: AuthStatus.unauthenticated);
   }
 
