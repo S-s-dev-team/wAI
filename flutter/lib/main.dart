@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:wai_api/wai_api.dart';
 
-final api = WaiApi(
-  basePathOverride: 'http://10.0.2.2:4010',
-);
+import 'core/router/router.dart';
+import 'core/theme/theme.dart';
 
 void main() {
-  runApp(const MaterialApp(
-    home: Scaffold(body: Center(child: Text('wAI'))),
-  ));
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'AI先輩',
+      theme: AppTheme.light,
+      routerConfig: router,
+    );
+  }
 }
