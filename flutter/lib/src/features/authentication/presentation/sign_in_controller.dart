@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../api_provider.dart';
 import '../data/auth_repository.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
@@ -30,7 +31,8 @@ class AuthState {
 // --- Providers ---
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository();
+  final api = ref.watch(waiApiProvider);
+  return AuthRepository(api: api);
 });
 
 final signInControllerProvider =

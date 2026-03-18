@@ -4,7 +4,8 @@ import '../../../constants/spacing.dart';
 import '../../../constants/text_styles.dart';
 import '../../../common_widgets/app_bottom_navigation.dart';
 import '../../../common_widgets/app_primary_button.dart';
-import '../../mentor/presentation/mentor_form_section.dart';
+import 'create_mentor_controller.dart';
+import 'create_mentor_form_section.dart';
 
 // ---------------------------------------------------------------------------
 // Data
@@ -26,51 +27,86 @@ const _occupationOptions = [
 ];
 
 class _IncomeTier {
-  const _IncomeTier({required this.range, required this.label});
+  const _IncomeTier({required this.range, required this.label, required this.value});
   final String range;
   final String label;
+  /// API に送る年収（万円）
+  final int value;
 }
 
 const _incomeOptions = [
-  _IncomeTier(range: '〜600万円', label: '中堅層'),
-  _IncomeTier(range: '600〜1,000万円', label: 'ハイキャリア'),
-  _IncomeTier(range: '1,000〜1,500万円', label: 'エグゼクティブ'),
-  _IncomeTier(range: '1,500万円〜', label: 'トップクラス'),
+  _IncomeTier(range: '〜600万円', label: '中堅層', value: 500),
+  _IncomeTier(range: '600〜1,000万円', label: 'ハイキャリア', value: 800),
+  _IncomeTier(range: '1,000〜1,500万円', label: 'エグゼクティブ', value: 1200),
+  _IncomeTier(range: '1,500万円〜', label: 'トップクラス', value: 1800),
 ];
 
-// ---------------------------------------------------------------------------
-// Screen
-// ---------------------------------------------------------------------------
-
-/// AI先輩作成画面（「理想の先輩を作る」）。
-///
-/// 性別・年齢・職種・年収を選択し、[onConfirm] でフォーム値を返す。
-class CreateSeniorScreen extends StatefulWidget {
-  const CreateSeniorScreen({
-    super.key,
-    this.onBack,
-    this.onConfirm,
-    this.onNavTap,
-    this.currentNavIndex = 0,
-  });
-
-  final VoidCallback? onBack;
-  final VoidCallback? onConfirm;
-  final ValueChanged<int>? onNavTap;
-  final int currentNavIndex;
-
-  @override
-  State<CreateSeniorScreen> createState() => _CreateSeniorScreenState();
+/// 年齢ラベルを API に送る代表値（int）に変換する。
+int _ageToInt(String label) {
+  switch (label) {
+    case '20代':
+      return 25;
+    case '30代':
+      return 35;
+    case '40代':
+      return 45;
+    case '50代':
+      return 55;
+    case '60代〜':
+      return 65;
+    case 'こだわらない':
+      return 30;
+    default:
+      return 30;
+  }
 }
 
-class _CreateSeniorScreenState extends State<CreateSeniorScreen> {
+// ---------------------------------------------------------------------------
+// Contents
+// ---------------------------------------------------------------------------
+
+/// 「理想の先輩を作る」フォームUI。
+///
+/// 性別・年齢・職種・年収を選択し、[onSubmit] で [CreateMentorInput] を返す。
+class CreateMentorContents extends StatefulWidget {
+  const CreateMentorContents({
+    super.key,
+    required this.onSubmit,
+    this.onBack,
+    this.isLoading = false,
+  });
+
+  final ValueChanged<CreateMentorInput> onSubmit;
+  final VoidCallback? onBack;
+  final bool isLoading;
+
+  @override
+  State<CreateMentorContents> createState() => _CreateMentorContentsState();
+}
+
+class _CreateMentorContentsState extends State<CreateMentorContents> {
   String? _gender;
   String? _age;
   String _occupation = _occupationOptions.first;
-  String? _income;
+  int? _selectedIncomeIndex;
 
   bool get _canSubmit =>
-      _gender != null && _age != null && _income != null;
+      _gender != null &&
+      _age != null &&
+      _selectedIncomeIndex != null &&
+      !widget.isLoading;
+
+  void _handleSubmit() {
+    if (!_canSubmit) return;
+    widget.onSubmit(
+      CreateMentorInput(
+        gender: _gender!,
+        age: _ageToInt(_age!),
+        occupation: _occupation,
+        annualIncome: _incomeOptions[_selectedIncomeIndex!].value,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +122,7 @@ class _CreateSeniorScreenState extends State<CreateSeniorScreen> {
           children: [
             const _AvatarHero(),
             const SizedBox(height: AppSpacing.xl),
-            MentorFormSection(
+            CreateMentorFormSection(
               label: '性別',
               icon: const Icon(Icons.wc_rounded),
               child: _GenderChips(
@@ -96,7 +132,7 @@ class _CreateSeniorScreenState extends State<CreateSeniorScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            MentorFormSection(
+            CreateMentorFormSection(
               label: '年齢',
               icon: const Icon(Icons.calendar_today_rounded),
               child: _AgeChips(
@@ -106,7 +142,7 @@ class _CreateSeniorScreenState extends State<CreateSeniorScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            MentorFormSection(
+            CreateMentorFormSection(
               label: '職種',
               icon: const Icon(Icons.work_outline_rounded),
               child: _OccupationDropdown(
@@ -116,27 +152,36 @@ class _CreateSeniorScreenState extends State<CreateSeniorScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            MentorFormSection(
+            CreateMentorFormSection(
               label: '年収',
               icon: const Icon(Icons.account_balance_wallet_outlined),
               child: _IncomeGrid(
                 options: _incomeOptions,
-                selected: _income,
-                onChanged: (v) => setState(() => _income = v),
+                selectedIndex: _selectedIncomeIndex,
+                onChanged: (i) => setState(() => _selectedIncomeIndex = i),
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
             AppPrimaryButton(
               label: 'この先輩と話す',
-              onPressed: _canSubmit ? widget.onConfirm : null,
-              leading: const Icon(Icons.chat_rounded, size: 20),
+              onPressed: _canSubmit ? _handleSubmit : null,
+              leading: widget.isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: AppColors.surface,
+                      ),
+                    )
+                  : const Icon(Icons.chat_rounded, size: 20),
             ),
             const SizedBox(height: AppSpacing.lg),
           ],
         ),
       ),
       bottomNavigationBar: AppBottomNavigation(
-        currentIndex: widget.currentNavIndex,
+        currentIndex: 0,
         items: const [
           AppBottomNavItem(
             label: 'メッセージ',
@@ -154,7 +199,7 @@ class _CreateSeniorScreenState extends State<CreateSeniorScreen> {
             activeIcon: Icon(Icons.settings_rounded),
           ),
         ],
-        onTap: (i) => widget.onNavTap?.call(i),
+        onTap: (_) {},
       ),
     );
   }
@@ -380,7 +425,7 @@ class _OccupationDropdown extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       icon: const Icon(Icons.keyboard_arrow_down_rounded),
       style: textTheme.bodyMedium,
       onChanged: onChanged,
@@ -403,17 +448,16 @@ class _OccupationDropdown extends StatelessWidget {
 class _IncomeGrid extends StatelessWidget {
   const _IncomeGrid({
     required this.options,
-    required this.selected,
+    required this.selectedIndex,
     required this.onChanged,
   });
 
   final List<_IncomeTier> options;
-  final String? selected;
-  final ValueChanged<String> onChanged;
+  final int? selectedIndex;
+  final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    // 4 items → 2 rows × 2 columns
     return Column(
       children: [
         Row(
@@ -421,16 +465,16 @@ class _IncomeGrid extends StatelessWidget {
             Expanded(
               child: _IncomeCard(
                 tier: options[0],
-                selected: selected == options[0].label,
-                onTap: () => onChanged(options[0].label),
+                selected: selectedIndex == 0,
+                onTap: () => onChanged(0),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _IncomeCard(
                 tier: options[1],
-                selected: selected == options[1].label,
-                onTap: () => onChanged(options[1].label),
+                selected: selectedIndex == 1,
+                onTap: () => onChanged(1),
               ),
             ),
           ],
@@ -441,16 +485,16 @@ class _IncomeGrid extends StatelessWidget {
             Expanded(
               child: _IncomeCard(
                 tier: options[2],
-                selected: selected == options[2].label,
-                onTap: () => onChanged(options[2].label),
+                selected: selectedIndex == 2,
+                onTap: () => onChanged(2),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _IncomeCard(
                 tier: options[3],
-                selected: selected == options[3].label,
-                onTap: () => onChanged(options[3].label),
+                selected: selectedIndex == 3,
+                onTap: () => onChanged(3),
               ),
             ),
           ],
