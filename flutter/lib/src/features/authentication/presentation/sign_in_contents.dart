@@ -12,12 +12,10 @@ class SignInContents extends StatelessWidget {
   const SignInContents({
     super.key,
     this.onGoogleLogin,
-    this.onSignUp,
     this.isLoading = false,
   });
 
   final VoidCallback? onGoogleLogin;
-  final VoidCallback? onSignUp;
   final bool isLoading;
 
   @override
