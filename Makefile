@@ -52,7 +52,7 @@ docs-down: ## Swagger UIを停止
 .PHONY: mock-up mock-down
 
 mock-up: ## Prism mock サーバーを起動（http://localhost:4010）
-	@$(DC) up -d prism
+	@$(DC) up prism
 
 mock-down: ## Prism mock サーバーを停止
 	@$(DC) stop prism
