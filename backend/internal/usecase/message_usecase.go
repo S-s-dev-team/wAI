@@ -9,20 +9,23 @@ import (
 )
 
 type MessageUsecase struct {
-	messageRepository domain.MessageRepository
-	personaRepository domain.PersonaRepository
-	aiRepository      domain.AIRepository
+	messageRepository         domain.MessageRepository
+	personaRepository         domain.PersonaRepository
+	chatParticipantRepository domain.ChatParticipantRepository
+	aiRepository              domain.AIRepository
 }
 
 func NewMessageUsecase(
 	messageRepository domain.MessageRepository,
 	personaRepository domain.PersonaRepository,
+	chatParticipantRepository domain.ChatParticipantRepository,
 	aiRepository domain.AIRepository,
 ) *MessageUsecase {
 	return &MessageUsecase{
-		messageRepository: messageRepository,
-		personaRepository: personaRepository,
-		aiRepository:      aiRepository,
+		messageRepository:         messageRepository,
+		personaRepository:         personaRepository,
+		chatParticipantRepository: chatParticipantRepository,
+		aiRepository:              aiRepository,
 	}
 }
 
@@ -45,6 +48,11 @@ type ListMessagesInput struct {
 type ListMessagesOutput struct {
 	Messages []*domain.Message
 	HasMore  bool
+}
+
+type CallPersonaInput struct {
+	ChatID    uuid.UUID
+	PresetKey string
 }
 
 func (u *MessageUsecase) Send(ctx context.Context, input SendMessageInput) (*SendMessageOutput, error) {
@@ -103,6 +111,7 @@ func (u *MessageUsecase) Send(ctx context.Context, input SendMessageInput) (*Sen
 	replyMsg, err := u.messageRepository.Create(ctx, &domain.Message{
 		ChatID:     input.ChatID,
 		SenderType: "persona",
+		PersonaID:  &persona.ID,
 		Content:    aiResp.Content,
 	})
 	if err != nil {
@@ -113,6 +122,88 @@ func (u *MessageUsecase) Send(ctx context.Context, input SendMessageInput) (*Sen
 		UserMessage: userMsg,
 		Replies:     []*domain.Message{replyMsg},
 	}, nil
+}
+
+func (u *MessageUsecase) CallPersona(ctx context.Context, input CallPersonaInput) (*domain.Message, error) {
+	// 1. プリセット先輩を取得
+	persona, err := u.personaRepository.GetByPresetKey(ctx, input.PresetKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get preset persona: %w", err)
+	}
+
+	// 2. chat_participants に追加（既にあればスキップ）
+	participants, err := u.chatParticipantRepository.ListByChatID(ctx, input.ChatID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list participants: %w", err)
+	}
+	alreadyJoined := false
+	for _, p := range participants {
+		if p.PersonaID == persona.ID {
+			alreadyJoined = true
+			break
+		}
+	}
+	if !alreadyJoined {
+		_, err = u.chatParticipantRepository.Create(ctx, &domain.ChatParticipant{
+			ChatID:    input.ChatID,
+			PersonaID: persona.ID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to add participant: %w", err)
+		}
+	}
+
+	// 3. 過去メッセージ履歴を取得
+	pastMessages, err := u.messageRepository.ListByChatID(ctx, input.ChatID, 50, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get past messages: %w", err)
+	}
+
+	var history []domain.ChatMessage
+	for _, m := range pastMessages {
+		role := "user"
+		if m.SenderType == "persona" {
+			role = "model"
+		}
+		history = append(history, domain.ChatMessage{
+			Role:    role,
+			Content: m.Content,
+		})
+	}
+
+	// 4. プリセット先輩の system_prompt + 履歴で Gemini にリクエスト
+	lastUserMsg := ""
+	for i := len(pastMessages) - 1; i >= 0; i-- {
+		if pastMessages[i].SenderType == "user" {
+			lastUserMsg = pastMessages[i].Content
+			break
+		}
+	}
+	if lastUserMsg == "" {
+		lastUserMsg = "こんにちは、アドバイスをお願いします。"
+	}
+
+	aiResp, err := u.aiRepository.SendMessage(ctx, &domain.AIRequest{
+		SystemPrompt: persona.SystemPrompt,
+		History:      history,
+		UserMessage:  lastUserMsg,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to send ai message: %w", err)
+	}
+
+	// 5. 応答を Message として保存（persona_id 付き）
+	replyMsg, err := u.messageRepository.Create(ctx, &domain.Message{
+		ChatID:     input.ChatID,
+		SenderType: "persona",
+		PersonaID:  &persona.ID,
+		Content:    aiResp.Content,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return replyMsg, nil
 }
 
 func (u *MessageUsecase) List(ctx context.Context, input ListMessagesInput) (*ListMessagesOutput, error) {
@@ -140,12 +231,29 @@ func (u *MessageUsecase) List(ctx context.Context, input ListMessagesInput) (*Li
 
 // TODO)seba)
 func buildSystemPrompt(persona *domain.Persona) string {
+	age := 0
+	if persona.Age != nil {
+		age = *persona.Age
+	}
+	gender := ""
+	if persona.Gender != nil {
+		gender = *persona.Gender
+	}
+	occupation := ""
+	if persona.Occupation != nil {
+		occupation = *persona.Occupation
+	}
+	annualIncome := 0
+	if persona.AnnualIncome != nil {
+		annualIncome = *persona.AnnualIncome
+	}
+
 	prompt := fmt.Sprintf(
 		"あなたは「%s」という名前の先輩です。"+
 			"年齢: %d歳、性別: %s、職業: %s、年収: %d万円。"+
 			"この人物になりきって、後輩に対してアドバイスや会話をしてください。"+
 			"フレンドリーで親しみやすい口調で話してください。",
-		persona.Name, persona.Age, persona.Gender, persona.Occupation, persona.AnnualIncome,
+		persona.Name, age, gender, occupation, annualIncome,
 	)
 	if persona.SystemPrompt != "" {
 		prompt += "\n追加の指示: " + persona.SystemPrompt
