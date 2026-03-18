@@ -18,11 +18,7 @@ class AuthState {
     this.error,
   });
 
-  AuthState copyWith({
-    AuthStatus? status,
-    bool? isLoading,
-    String? error,
-  }) {
+  AuthState copyWith({AuthStatus? status, bool? isLoading, String? error}) {
     return AuthState(
       status: status ?? this.status,
       isLoading: isLoading ?? this.isLoading,
@@ -39,9 +35,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 final signInControllerProvider =
     StateNotifierProvider<SignInController, AuthState>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return SignInController(repository);
-});
+      final repository = ref.watch(authRepositoryProvider);
+      return SignInController(repository);
+    });
 
 // --- Controller ---
 
@@ -70,20 +66,13 @@ class SignInController extends StateNotifier<AuthState> {
         return;
       }
 
-      state = state.copyWith(
-        status: AuthStatus.authenticated,
-        isLoading: false,
-      );
+      state = state.copyWith(status: AuthStatus.authenticated);
     } on FirebaseAuthException catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.message ?? '認証に失敗しました',
-      );
+      state = state.copyWith(error: e.message ?? '認証に失敗しました');
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: 'ログインに失敗しました',
-      );
+      state = state.copyWith(error: 'ログインに失敗しました');
+    } finally {
+      state = state.copyWith(isLoading: false);
     }
   }
 
