@@ -21,9 +21,7 @@ class CreateMentorScreen extends ConsumerWidget {
         );
       }
       if (next.createdChatId != null && prev?.createdChatId == null) {
-        // TODO: チャット画面への遷移（チャット画面のルート実装後）
-        // context.go('/chat/${next.createdChatId}');
-        context.go('/');
+        context.go('/chat/${next.createdChatId}');
       }
     });
 
