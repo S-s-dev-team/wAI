@@ -56,14 +56,16 @@ func (u *ChatUsecase) Create(ctx context.Context, input CreateChatInput) (*ChatO
 
 	// generatedSystemPrompt := genPrompt(input.Persona) //どこかで関数作る
 
+	chatID := chat.ID
 	persona, err := u.personaRepository.Create(ctx, &domain.Persona{
-		ChatID:       chat.ID,
+		UserID:       &input.UserID,
+		ChatID:       &chatID,
 		Name:         input.PersonaName,
 		PersonaType:  input.PersonaType,
-		Age:          input.Age,
-		Gender:       input.Gender,
-		Occupation:   input.Occupation,
-		AnnualIncome: input.AnnualIncome,
+		Age:          &input.Age,
+		Gender:       &input.Gender,
+		Occupation:   &input.Occupation,
+		AnnualIncome: &input.AnnualIncome,
 		SystemPrompt: input.SystemPrompt, //generatedSystemPromptを入れる
 	})
 	if err != nil {
