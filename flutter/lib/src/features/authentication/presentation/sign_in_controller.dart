@@ -50,9 +50,7 @@ class SignInController extends StateNotifier<AuthState> {
   }
 
   void _onAuthStateChanged(User? user) {
-    if (user != null) {
-      state = state.copyWith(status: AuthStatus.authenticated);
-    } else {
+    if (user == null) {
       state = state.copyWith(status: AuthStatus.unauthenticated);
     }
   }
@@ -70,6 +68,8 @@ class SignInController extends StateNotifier<AuthState> {
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(error: e.message ?? '認証に失敗しました');
     } catch (e) {
+      // BE /login 失敗時は Firebase からもサインアウト
+      await _repository.signOut();
       state = state.copyWith(error: 'ログインに失敗しました');
     } finally {
       state = state.copyWith(isLoading: false);
