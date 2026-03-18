@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/S-s-dev-team/wAI/internal/api"
@@ -42,7 +43,7 @@ func (s *Server) ListMessages(ctx echo.Context, chatId openapi_types.UUID, param
 
 	messages := make([]api.Message, len(output.Messages))
 	for i, m := range output.Messages {
-		messages[i] = messageToResponse(m)
+		messages[i] = s.messageToResponse(ctx.Request().Context(), m)
 	}
 
 	return ctx.JSON(http.StatusOK, api.MessageList{
@@ -78,21 +79,83 @@ func (s *Server) SendMessage(ctx echo.Context, chatId openapi_types.UUID) error 
 
 	replies := make([]api.Message, len(output.Replies))
 	for i, r := range output.Replies {
-		replies[i] = messageToResponse(r)
+		replies[i] = s.messageToResponse(ctx.Request().Context(), r)
 	}
 
 	return ctx.JSON(http.StatusOK, api.SendMessageResponse{
-		UserMessage: messageToResponse(output.UserMessage),
+		UserMessage: s.messageToResponse(ctx.Request().Context(), output.UserMessage),
 		Replies:     replies,
 	})
 }
 
-func messageToResponse(m *domain.Message) api.Message {
-	return api.Message{
+func (s *Server) CallPersona(ctx echo.Context, chatId openapi_types.UUID) error {
+	_, err := s.authenticate(ctx)
+	if err != nil {
+		return err
+	}
+
+	var req api.CallPersonaRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, api.ErrorResponse{
+			Code:    400,
+			Message: "invalid request",
+		})
+	}
+
+	msg, err := s.messageUC.CallPersona(ctx.Request().Context(), usecase.CallPersonaInput{
+		ChatID:    uuid.UUID(chatId),
+		PresetKey: string(req.PresetKey),
+	})
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, api.ErrorResponse{
+			Code:    500,
+			Message: "failed to call persona",
+		})
+	}
+
+	return ctx.JSON(http.StatusCreated, s.messageToResponse(ctx.Request().Context(), msg))
+}
+
+func (s *Server) messageToResponse(ctx context.Context, m *domain.Message) api.Message {
+	msg := api.Message{
 		Id:         openapi_types.UUID(m.ID),
 		ChatId:     openapi_types.UUID(m.ChatID),
 		SenderType: api.MessageSenderType(m.SenderType),
 		Content:    m.Content,
 		CreatedAt:  m.CreatedAt,
 	}
+
+	if m.PersonaID != nil {
+		persona, err := s.personaRepo.GetByID(ctx, *m.PersonaID)
+		if err == nil && persona != nil {
+			p := personaToResponse(persona)
+			msg.Persona = &p
+		}
+	}
+
+	return msg
+}
+
+func personaToResponse(p *domain.Persona) api.Persona {
+	resp := api.Persona{
+		Id:          openapi_types.UUID(p.ID),
+		Name:        p.Name,
+		PersonaType: api.PersonaPersonaType(p.PersonaType),
+	}
+	if p.PresetKeyID != nil {
+		resp.PresetKeyId = p.PresetKeyID
+	}
+	if p.Age != nil {
+		resp.Age = p.Age
+	}
+	if p.AnnualIncome != nil {
+		resp.AnnualIncome = p.AnnualIncome
+	}
+	if p.Gender != nil {
+		resp.Gender = p.Gender
+	}
+	if p.Occupation != nil {
+		resp.Occupation = p.Occupation
+	}
+	return resp
 }
