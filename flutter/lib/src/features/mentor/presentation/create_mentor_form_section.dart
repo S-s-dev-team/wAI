@@ -5,8 +5,8 @@ import '../../../constants/spacing.dart';
 ///
 /// ラベル・任意アイコン・子ウィジェットで構成される汎用レイアウト。
 /// [child] には性別トグル・年齢チップ・職種ドロップダウンなど任意の入力UIを渡す。
-class MentorFormSection extends StatelessWidget {
-  const MentorFormSection({
+class CreateMentorFormSection extends StatelessWidget {
+  const CreateMentorFormSection({
     super.key,
     required this.label,
     required this.child,
