@@ -159,34 +159,47 @@ func (u *MessageUsecase) CallPersona(ctx context.Context, input CallPersonaInput
 		return nil, fmt.Errorf("failed to get past messages: %w", err)
 	}
 
-	var history []domain.ChatMessage
-	for _, m := range pastMessages {
-		role := "user"
-		if m.SenderType == "persona" {
-			role = "model"
-		}
-		history = append(history, domain.ChatMessage{
-			Role:    role,
-			Content: m.Content,
-		})
+	// チャットの元の先輩の名前を取得
+	originalPersona, _ := u.personaRepository.GetByChatID(ctx, input.ChatID)
+	originalName := "別の先輩"
+	if originalPersona != nil {
+		originalName = originalPersona.Name
 	}
 
-	// 4. プリセット先輩の system_prompt + 履歴で Gemini にリクエスト
-	lastUserMsg := ""
-	for i := len(pastMessages) - 1; i >= 0; i-- {
-		if pastMessages[i].SenderType == "user" {
-			lastUserMsg = pastMessages[i].Content
-			break
+	// 過去の会話を第三者視点のテキストとして構築
+	var conversationLog string
+	for _, m := range pastMessages {
+		if m.SenderType == "user" {
+			conversationLog += "【就活生】" + m.Content + "\n"
+		} else {
+			// 元の先輩の発言として記録
+			senderName := originalName
+			if m.PersonaID != nil && originalPersona != nil && *m.PersonaID != originalPersona.ID {
+				// 別のプリセット先輩の発言
+				p, err := u.personaRepository.GetByID(ctx, *m.PersonaID)
+				if err == nil {
+					senderName = p.Name
+				}
+			}
+			conversationLog += "【" + senderName + "】" + m.Content + "\n"
 		}
 	}
-	if lastUserMsg == "" {
-		lastUserMsg = "こんにちは、アドバイスをお願いします。"
-	}
+
+	// 4. システムプロンプトに「別の先輩として途中参加」する指示を追加
+	systemPrompt := persona.SystemPrompt + "\n\n" +
+		"【重要な前提】\n" +
+		"あなたは「" + persona.Name + "」です。\n" +
+		"就活生が「" + originalName + "」と相談をしていたところに、別の視点を持つ先輩として途中から呼ばれました。\n" +
+		"以下はこれまでの会話ログです。これはあなたの発言ではなく、就活生と「" + originalName + "」のやりとりです。\n" +
+		"この会話内容を踏まえた上で、あなた独自の立場・視点から新たにアドバイスしてください。\n" +
+		"「" + originalName + "」の意見に同調するのではなく、あなたならではの切り口で話してください。\n" +
+		"自己紹介を簡潔にしてから本題に入ってください。\n\n" +
+		"--- これまでの会話ログ ---\n" + conversationLog
 
 	aiResp, err := u.aiRepository.SendMessage(ctx, &domain.AIRequest{
-		SystemPrompt: persona.SystemPrompt,
-		History:      history,
-		UserMessage:  lastUserMsg,
+		SystemPrompt: systemPrompt,
+		History:      nil,
+		UserMessage:  "会話を読んだ上で、あなたの立場からアドバイスをお願いします。",
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to send ai message: %w", err)
