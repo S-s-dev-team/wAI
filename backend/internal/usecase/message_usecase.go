@@ -48,6 +48,7 @@ type ListMessagesOutput struct {
 }
 
 func (u *MessageUsecase) Send(ctx context.Context, input SendMessageInput) (*SendMessageOutput, error) {
+	// ユーザーメッセージを保存
 	userMsg, err := u.messageRepository.Create(ctx, &domain.Message{
 		ChatID:     input.ChatID,
 		SenderType: "user",
@@ -57,18 +58,22 @@ func (u *MessageUsecase) Send(ctx context.Context, input SendMessageInput) (*Sen
 		return nil, err
 	}
 
+	// Personaのシステムプロンプトを取得
 	persona, err := u.personaRepository.GetByChatID(ctx, input.ChatID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get persona: %w", err)
 	}
 
+	// システムプロンプトを構築
 	systemPrompt := buildSystemPrompt(persona)
 
+	// 過去のメッセージを取得して会話履歴を構築
 	pastMessages, err := u.messageRepository.ListByChatID(ctx, input.ChatID, 50, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get past messages: %w", err)
 	}
 
+	// 会話履歴を構築（最新のユーザーメッセージは除く）
 	var history []domain.ChatMessage
 	for _, m := range pastMessages {
 		if m.ID == userMsg.ID {
@@ -84,6 +89,7 @@ func (u *MessageUsecase) Send(ctx context.Context, input SendMessageInput) (*Sen
 		})
 	}
 
+	// AIにリクエスト送信
 	aiResp, err := u.aiRepository.SendMessage(ctx, &domain.AIRequest{
 		SystemPrompt: systemPrompt,
 		History:      history,
@@ -93,6 +99,7 @@ func (u *MessageUsecase) Send(ctx context.Context, input SendMessageInput) (*Sen
 		return nil, fmt.Errorf("failed to send ai message: %w", err)
 	}
 
+	// AIの返答を保存
 	replyMsg, err := u.messageRepository.Create(ctx, &domain.Message{
 		ChatID:     input.ChatID,
 		SenderType: "persona",
@@ -114,6 +121,7 @@ func (u *MessageUsecase) List(ctx context.Context, input ListMessagesInput) (*Li
 		limit = 50
 	}
 
+	// 1件多く取得してhasMoreを判定
 	messages, err := u.messageRepository.ListByChatID(ctx, input.ChatID, limit+1, input.Before)
 	if err != nil {
 		return nil, err
@@ -130,6 +138,7 @@ func (u *MessageUsecase) List(ctx context.Context, input ListMessagesInput) (*Li
 	}, nil
 }
 
+// TODO)seba)
 func buildSystemPrompt(persona *domain.Persona) string {
 	prompt := fmt.Sprintf(
 		"あなたは「%s」という名前の先輩です。"+
