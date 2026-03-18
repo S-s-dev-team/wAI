@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'create_mentor_controller.dart';
 import 'create_mentor_contents.dart';
@@ -21,9 +22,8 @@ class CreateMentorScreen extends ConsumerWidget {
       }
       if (next.createdChatId != null && prev?.createdChatId == null) {
         // TODO: チャット画面への遷移（チャット画面のルート実装後）
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('先輩を作成しました')),
-        );
+        // context.go('/chat/${next.createdChatId}');
+        context.go('/');
       }
     });
 
@@ -34,7 +34,7 @@ class CreateMentorScreen extends ConsumerWidget {
             .read(createMentorControllerProvider.notifier)
             .createMentor(input);
       },
-      onBack: () => Navigator.maybePop(context),
+      onBack: () => context.pop(),
     );
   }
 }

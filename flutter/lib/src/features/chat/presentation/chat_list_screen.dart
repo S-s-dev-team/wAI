@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../constants/colors.dart';
 import '../../../constants/spacing.dart';
 import '../../../common_widgets/app_bottom_navigation.dart';
 import '../../../common_widgets/app_chip.dart';
-import '../../senior/presentation/create_senior_screen.dart';
 import '../../dashboard/presentation/dashboard_screen.dart';
 
 // ---------------------------------------------------------------------------
@@ -71,6 +71,16 @@ class _ChatListScreenState extends State<ChatListScreen> {
   int _selectedCategory = 0;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.items.isEmpty) {
+        context.go('/create-mentor');
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.base,
@@ -104,9 +114,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       ),
       floatingActionButton: _NewChatFab(
         onTap: widget.onNewChat ?? () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const CreateSeniorScreen()),
-          );
+          context.push('/create-mentor');
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
