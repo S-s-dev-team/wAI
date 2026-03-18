@@ -29,11 +29,9 @@ class AuthRepository {
         await _firebaseAuth.signInWithCredential(credential);
 
     // バックエンドAPIにログインを同期
-    final firebaseIdToken = await userCredential.user?.getIdToken();
-    if (firebaseIdToken != null) {
-      _api.setBearerAuth('BearerAuth', firebaseIdToken);
-      await _api.getAuthApi().login();
-    }
+    // Bearer トークンは FirebaseAuthInterceptor が自動付与するため
+    // setBearerAuth() は不要。
+    await _api.getAuthApi().login();
 
     return userCredential.user;
   }
