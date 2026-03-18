@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../api_provider.dart';
 import '../data/mentor_repository.dart';
 
 /// フォームから送信される先輩作成の入力値。
@@ -47,7 +48,8 @@ class CreateMentorState {
 // --- Providers ---
 
 final mentorRepositoryProvider = Provider<MentorRepository>((ref) {
-  return MentorRepository();
+  final api = ref.watch(waiApiProvider);
+  return MentorRepository(api: api);
 });
 
 final createMentorControllerProvider =
