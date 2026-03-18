@@ -223,41 +223,6 @@ class _LoginIcon extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Sign Up Link
-// ---------------------------------------------------------------------------
-
-class _SignUpRow extends StatelessWidget {
-  const _SignUpRow({this.onSignUp});
-
-  final VoidCallback? onSignUp;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'New to AI先輩? ',
-          style: AppTextStyles.body.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        GestureDetector(
-          onTap: onSignUp,
-          child: Text(
-            'Sign up',
-            style: AppTextStyles.body.copyWith(
-              color: AppColors.accent,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Empowered Banner
 // ---------------------------------------------------------------------------
 
