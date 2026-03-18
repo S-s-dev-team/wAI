@@ -75,11 +75,16 @@ class ChatController extends StateNotifier<ChatState> {
     try {
       final result = await _repository.getMessages(chatId: chatId);
       final messages = result.messages.map(_toPresentation).toList();
-      state = state.copyWith(messages: messages, hasMore: result.hasMore);
+      state = state.copyWith(
+        messages: messages,
+        hasMore: result.hasMore,
+        isLoading: false,
+      );
     } catch (e) {
-      state = state.copyWith(error: 'メッセージの取得に失敗しました');
-    } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(
+        error: 'メッセージの取得に失敗しました',
+        isLoading: false,
+      );
     }
   }
 
@@ -99,11 +104,12 @@ class ChatController extends StateNotifier<ChatState> {
         _toPresentation(result.userMessage),
         ...result.replies.map(_toPresentation),
       ];
-      state = state.copyWith(messages: updated);
+      state = state.copyWith(messages: updated, isSending: false);
     } catch (e) {
-      state = state.copyWith(error: 'メッセージの送信に失敗しました');
-    } finally {
-      state = state.copyWith(isSending: false);
+      state = state.copyWith(
+        error: 'メッセージの送信に失敗しました',
+        isSending: false,
+      );
     }
   }
 
