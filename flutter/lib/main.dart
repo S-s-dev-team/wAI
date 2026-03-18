@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'core/router/router.dart';
-import 'core/theme/theme.dart';
+import 'src/router/router.dart';
+import 'src/constants/theme.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
