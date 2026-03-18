@@ -25,7 +25,7 @@ func main() {
 	}
 
 	// マイグレーション
-	if err := app.DB.AutoMigrate(&domain.User{}, &domain.Chat{}, &domain.Persona{}); err != nil {
+	if err := app.DB.AutoMigrate(&domain.User{}, &domain.Chat{}, &domain.Persona{}, &domain.Message{}); err != nil {
 		log.Fatalf("failed to migrate: %v", err)
 	}
 
