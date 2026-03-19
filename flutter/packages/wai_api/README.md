@@ -68,12 +68,14 @@ Class | Method | HTTP request | Description
 [*ChatsApi*](doc/ChatsApi.md) | [**createChat**](doc/ChatsApi.md#createchat) | **POST** /chats | チャット作成
 [*ChatsApi*](doc/ChatsApi.md) | [**listChats**](doc/ChatsApi.md#listchats) | **GET** /chats | チャット一覧
 [*HealthApi*](doc/HealthApi.md) | [**healthCheck**](doc/HealthApi.md#healthcheck) | **GET** /health | ヘルスチェック
+[*MessagesApi*](doc/MessagesApi.md) | [**callPersona**](doc/MessagesApi.md#callpersona) | **POST** /chats/{chatId}/call-persona | プリセット先輩を呼ぶ
 [*MessagesApi*](doc/MessagesApi.md) | [**listMessages**](doc/MessagesApi.md#listmessages) | **GET** /chats/{chatId}/messages | メッセージ一覧
 [*MessagesApi*](doc/MessagesApi.md) | [**sendMessage**](doc/MessagesApi.md#sendmessage) | **POST** /chats/{chatId}/messages | メッセージ送信
 
 
 ## Documentation For Models
 
+ - [CallPersonaRequest](doc/CallPersonaRequest.md)
  - [Chat](doc/Chat.md)
  - [CreateChatRequest](doc/CreateChatRequest.md)
  - [CreatePersonaInput](doc/CreatePersonaInput.md)

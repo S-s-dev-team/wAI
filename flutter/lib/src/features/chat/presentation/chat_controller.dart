@@ -113,6 +113,24 @@ class ChatController extends StateNotifier<ChatState> {
     }
   }
 
+  /// プリセット先輩を呼び出し、応答メッセージを追加する。
+  Future<void> callPersona(String presetKey) async {
+    state = state.copyWith(isSending: true, error: null);
+    try {
+      final message = await _repository.callPersona(
+        chatId: chatId,
+        presetKey: presetKey,
+      );
+      final updated = [...state.messages, _toPresentation(message)];
+      state = state.copyWith(messages: updated, isSending: false);
+    } catch (e) {
+      state = state.copyWith(
+        error: '先輩の呼び出しに失敗しました',
+        isSending: false,
+      );
+    }
+  }
+
   /// API の [Message] を presentation の [ChatMessage] に変換する。
   static ChatMessage _toPresentation(Message msg) {
     return ChatMessage(

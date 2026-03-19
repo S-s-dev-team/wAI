@@ -12,6 +12,7 @@ const _apiBaseUrl = String.fromEnvironment(
 /// [FirebaseAuthInterceptor] により Bearer トークンが自動付与される。
 final waiApiProvider = Provider<WaiApi>((ref) {
   final api = WaiApi(basePathOverride: _apiBaseUrl);
+  api.dio.options.receiveTimeout = const Duration(seconds: 30);
   api.dio.interceptors.add(FirebaseAuthInterceptor());
   return api;
 });

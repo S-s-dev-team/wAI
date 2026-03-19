@@ -15,6 +15,7 @@ export 'package:wai_api/src/api/chats_api.dart';
 export 'package:wai_api/src/api/health_api.dart';
 export 'package:wai_api/src/api/messages_api.dart';
 
+export 'package:wai_api/src/model/call_persona_request.dart';
 export 'package:wai_api/src/model/chat.dart';
 export 'package:wai_api/src/model/create_chat_request.dart';
 export 'package:wai_api/src/model/create_persona_input.dart';

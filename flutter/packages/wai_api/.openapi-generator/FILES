@@ -1,8 +1,8 @@
 .gitignore
-.openapi-generator-ignore
 README.md
 analysis_options.yaml
 doc/AuthApi.md
+doc/CallPersonaRequest.md
 doc/Chat.md
 doc/ChatsApi.md
 doc/CreateChatRequest.md
@@ -29,6 +29,7 @@ lib/src/auth/basic_auth.dart
 lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/date_serializer.dart
+lib/src/model/call_persona_request.dart
 lib/src/model/chat.dart
 lib/src/model/create_chat_request.dart
 lib/src/model/create_persona_input.dart
@@ -44,18 +45,4 @@ lib/src/model/send_message_response.dart
 lib/src/serializers.dart
 lib/wai_api.dart
 pubspec.yaml
-test/auth_api_test.dart
-test/chat_test.dart
-test/chats_api_test.dart
-test/create_chat_request_test.dart
-test/create_persona_input_test.dart
-test/error_response_test.dart
-test/health_api_test.dart
-test/health_response_test.dart
-test/login_response_test.dart
-test/message_list_test.dart
-test/message_test.dart
-test/messages_api_test.dart
-test/persona_test.dart
-test/send_message_request_test.dart
-test/send_message_response_test.dart
+test/call_persona_request_test.dart

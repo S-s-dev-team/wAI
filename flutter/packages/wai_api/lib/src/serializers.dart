@@ -14,6 +14,7 @@ import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:wai_api/src/date_serializer.dart';
 import 'package:wai_api/src/model/date.dart';
 
+import 'package:wai_api/src/model/call_persona_request.dart';
 import 'package:wai_api/src/model/chat.dart';
 import 'package:wai_api/src/model/create_chat_request.dart';
 import 'package:wai_api/src/model/create_persona_input.dart';
@@ -29,6 +30,7 @@ import 'package:wai_api/src/model/send_message_response.dart';
 part 'serializers.g.dart';
 
 @SerializersFor([
+  CallPersonaRequest,
   Chat,
   CreateChatRequest,
   CreatePersonaInput,
