@@ -11,23 +11,29 @@ import (
 )
 
 type Server struct {
-	authRepo domain.AuthRepository
-	userRepo domain.UserRepository
-	loginUC  *usecase.Login
-	chatUC   *usecase.ChatUsecase
+	authRepo    domain.AuthRepository
+	userRepo    domain.UserRepository
+	personaRepo domain.PersonaRepository
+	loginUC     *usecase.Login
+	chatUC      *usecase.ChatUsecase
+	messageUC   *usecase.MessageUsecase
 }
 
 func NewServer(
 	authRepo domain.AuthRepository,
 	userRepo domain.UserRepository,
+	personaRepo domain.PersonaRepository,
 	loginUC *usecase.Login,
 	chatUC *usecase.ChatUsecase,
+	messageUC *usecase.MessageUsecase,
 ) *Server {
 	return &Server{
-		authRepo: authRepo,
-		userRepo: userRepo,
-		loginUC:  loginUC,
-		chatUC:   chatUC,
+		authRepo:    authRepo,
+		userRepo:    userRepo,
+		personaRepo: personaRepo,
+		loginUC:     loginUC,
+		chatUC:      chatUC,
+		messageUC:   messageUC,
 	}
 }
 
