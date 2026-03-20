@@ -33,7 +33,7 @@ sequenceDiagram
     Backend-->>User: 9. ユーザー情報返却
 
     Note over User,Backend: 以降のリクエスト
-    User->>Backend: 10. Authorization: Bearer &lt;ID Token&gt;
+    User->>Backend: 10. Authorization: Bearer [ID Token]
 ```
 
 ## 詳細
