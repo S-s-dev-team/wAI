@@ -65,11 +65,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             icon: Icon(Icons.grid_view_outlined),
             activeIcon: Icon(Icons.grid_view_rounded),
           ),
-          AppBottomNavItem(
-            label: '設定',
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings_rounded),
-          ),
         ],
         onTap: (i) {
           if (i == 0) {

@@ -123,6 +123,8 @@ func (u *InsightUsecase) Analyze(ctx context.Context, userID uuid.UUID, chatID u
 
 	// 5. AIの応答をJSONパース
 	content := aiResp.Content
+	log.Printf("[Insight] raw AI response: %s", content)
+
 	// マークダウンコードブロックを除去
 	content = strings.TrimSpace(content)
 	if strings.HasPrefix(content, "```") {
@@ -132,6 +134,7 @@ func (u *InsightUsecase) Analyze(ctx context.Context, userID uuid.UUID, chatID u
 			content = strings.Join(lines, "\n")
 		}
 	}
+	content = strings.TrimSpace(content)
 
 	var parsed aiInsightResponse
 	if err := json.Unmarshal([]byte(content), &parsed); err != nil {
@@ -139,11 +142,14 @@ func (u *InsightUsecase) Analyze(ctx context.Context, userID uuid.UUID, chatID u
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
 	}
 
+	log.Printf("[Insight] parsed %d insights from AI", len(parsed.Insights))
+
 	// 6. 各インサイトを保存
 	var savedInsights []*domain.Insight
 	for _, item := range parsed.Insights {
 		cat, ok := categoryMap[item.CategoryKey]
 		if !ok {
+			log.Printf("[Insight] unknown category_key: %s, skipping", item.CategoryKey)
 			continue
 		}
 

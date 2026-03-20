@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../common_widgets/chat_input_bar.dart';
+import '../../dashboard/presentation/dashboard_controller.dart';
 import 'add_senior_overlay.dart';
 import 'chat_controller.dart';
 import 'chat_header.dart';
@@ -64,6 +65,23 @@ class ChatScreen extends ConsumerWidget {
                 context: context,
                 onConfirm: (presetKey) => controller.callPersona(presetKey),
               ),
+              onUpdateAnalysis: () async {
+                final repo = ref.read(dashboardRepositoryProvider);
+                try {
+                  final result = await repo.analyzeChat(chatId: chatId);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('ダッシュボードを更新しました')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('自己分析の更新に失敗しました')),
+                    );
+                  }
+                }
+              },
             ),
           ],
         ),
