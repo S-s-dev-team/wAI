@@ -4,7 +4,6 @@ import '../../../constants/colors.dart';
 import '../../../constants/spacing.dart';
 import '../../../common_widgets/app_bottom_navigation.dart';
 import '../../../common_widgets/app_chip.dart';
-import '../../dashboard/presentation/dashboard_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Data model
@@ -140,48 +139,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         onTap: (i) {
           widget.onNavTap?.call(i);
           if (i == 1) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const DashboardScreen(
-                  analysisCount: '12',
-                  analysisTrend: '+3',
-                  analysisTrendPositive: true,
-                  insightCount: '34',
-                  insightTrend: '+8',
-                  insightTrendPositive: true,
-                  coreValue: CoreValueData(
-                    badge: '✨',
-                    timestamp: '2024-03-15',
-                    title: '成長志向',
-                    description: '常に学び続けることを大切にしている',
-                  ),
-                  strengths: [
-                    StrengthData(
-                      icon: Icons.lightbulb_outline_rounded,
-                      name: '問題解決力',
-                      description: '複雑な課題を分解して解決できる',
-                    ),
-                    StrengthData(
-                      icon: Icons.people_outline_rounded,
-                      name: 'コミュニケーション力',
-                      description: '多様な立場の人と円滑に協力できる',
-                    ),
-                  ],
-                  interests: ['IT・通信', 'マーケティング', 'コンサルティング'],
-                  insightQuotes: [
-                    InsightQuoteData(
-                      text: 'チームで協力することにやりがいを感じる',
-                      label: 'チームワーク',
-                      isFeatured: true,
-                    ),
-                    InsightQuoteData(
-                      text: '新しい技術を習得することが好き',
-                      label: '学習意欲',
-                    ),
-                  ],
-                ),
-              ),
-            );
+            context.push('/dashboard');
           }
         },
       ),

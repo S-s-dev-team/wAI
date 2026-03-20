@@ -68,6 +68,8 @@ Class | Method | HTTP request | Description
 [*ChatsApi*](doc/ChatsApi.md) | [**createChat**](doc/ChatsApi.md#createchat) | **POST** /chats | チャット作成
 [*ChatsApi*](doc/ChatsApi.md) | [**listChats**](doc/ChatsApi.md#listchats) | **GET** /chats | チャット一覧
 [*HealthApi*](doc/HealthApi.md) | [**healthCheck**](doc/HealthApi.md#healthcheck) | **GET** /health | ヘルスチェック
+[*InsightsApi*](doc/InsightsApi.md) | [**analyzeChat**](doc/InsightsApi.md#analyzechat) | **POST** /chats/{chatId}/analyze | チャット分析
+[*InsightsApi*](doc/InsightsApi.md) | [**getDashboard**](doc/InsightsApi.md#getdashboard) | **GET** /dashboard | ダッシュボード取得
 [*MessagesApi*](doc/MessagesApi.md) | [**callPersona**](doc/MessagesApi.md#callpersona) | **POST** /chats/{chatId}/call-persona | プリセット先輩を呼ぶ
 [*MessagesApi*](doc/MessagesApi.md) | [**listMessages**](doc/MessagesApi.md#listmessages) | **GET** /chats/{chatId}/messages | メッセージ一覧
 [*MessagesApi*](doc/MessagesApi.md) | [**sendMessage**](doc/MessagesApi.md#sendmessage) | **POST** /chats/{chatId}/messages | メッセージ送信
@@ -75,12 +77,16 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AnalyzeChatResponse](doc/AnalyzeChatResponse.md)
  - [CallPersonaRequest](doc/CallPersonaRequest.md)
  - [Chat](doc/Chat.md)
  - [CreateChatRequest](doc/CreateChatRequest.md)
  - [CreatePersonaInput](doc/CreatePersonaInput.md)
+ - [DashboardCategory](doc/DashboardCategory.md)
+ - [DashboardResponse](doc/DashboardResponse.md)
  - [ErrorResponse](doc/ErrorResponse.md)
  - [HealthResponse](doc/HealthResponse.md)
+ - [Insight](doc/Insight.md)
  - [LoginResponse](doc/LoginResponse.md)
  - [Message](doc/Message.md)
  - [MessageList](doc/MessageList.md)

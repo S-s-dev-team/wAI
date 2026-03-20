@@ -12,6 +12,7 @@ import 'package:wai_api/src/auth/oauth.dart';
 import 'package:wai_api/src/api/auth_api.dart';
 import 'package:wai_api/src/api/chats_api.dart';
 import 'package:wai_api/src/api/health_api.dart';
+import 'package:wai_api/src/api/insights_api.dart';
 import 'package:wai_api/src/api/messages_api.dart';
 
 class WaiApi {
@@ -84,6 +85,12 @@ class WaiApi {
   /// by doing that all interceptors will not be executed
   HealthApi getHealthApi() {
     return HealthApi(dio, serializers);
+  }
+
+  /// Get InsightsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  InsightsApi getInsightsApi() {
+    return InsightsApi(dio, serializers);
   }
 
   /// Get MessagesApi instance, base route and serializer can be overridden by a given but be careful,

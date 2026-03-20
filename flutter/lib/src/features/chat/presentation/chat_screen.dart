@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../common_widgets/chat_input_bar.dart';
 import 'add_senior_overlay.dart';
@@ -32,7 +33,7 @@ class ChatScreen extends ConsumerWidget {
       appBar: ChatHeader(
         title: title,
         avatarUrl: avatarUrl,
-        onBack: () => Navigator.maybePop(context),
+        onBack: () => context.go('/'),
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),

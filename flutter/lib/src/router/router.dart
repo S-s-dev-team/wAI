@@ -5,6 +5,7 @@ import '../features/authentication/presentation/sign_in_controller.dart';
 import '../features/authentication/presentation/sign_in_screen.dart';
 import '../features/chat/presentation/chat_list_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
+import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/mentor/presentation/create_mentor_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -39,6 +40,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final chatId = state.pathParameters['chatId']!;
           return ChatScreen(chatId: chatId);
         },
+      ),
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const DashboardScreen(),
       ),
       GoRoute(
         path: '/create-mentor',
