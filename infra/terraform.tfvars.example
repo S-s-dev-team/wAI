@@ -1,0 +1,8 @@
+project_id            = "your-gcp-project-id"
+region                = "asia-northeast1"
+gemini_api_key        = "your-gemini-api-key"
+firebase_project_id   = "your-firebase-project-id"
+firebase_api_key      = "your-firebase-api-key"
+firebase_auth_domain  = "your-firebase-project.firebaseapp.com"
+allowed_email_domains = ""
+db_password           = "your-db-password"
