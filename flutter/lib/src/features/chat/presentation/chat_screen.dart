@@ -61,7 +61,7 @@ class ChatScreen extends ConsumerWidget {
               onSend: (text) => controller.sendMessage(text),
               onAddSenior: () => showAddSeniorOverlay(
                 context: context,
-                onConfirm: (_) {},
+                onConfirm: (presetKey) => controller.callPersona(presetKey),
               ),
             ),
           ],

@@ -9,7 +9,15 @@ import '../../../common_widgets/mentor_option_card.dart';
 // Preset mentor data
 // ---------------------------------------------------------------------------
 
-enum _MentorPreset { passion, income }
+enum _MentorPreset {
+  passion('yarigai'),
+  income('nenshu');
+
+  const _MentorPreset(this.presetKey);
+
+  /// API に送信する preset_key 値。
+  final String presetKey;
+}
 
 class _MentorDef {
   const _MentorDef({
@@ -77,7 +85,7 @@ Future<void> showAddSeniorOverlay({
     pageBuilder: (ctx, animation, _) => _AddSeniorOverlayPage(
       onConfirm: (preset) {
         Navigator.of(ctx).pop();
-        onConfirm(preset.name);
+        onConfirm(preset.presetKey);
       },
     ),
   );

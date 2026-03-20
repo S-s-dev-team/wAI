@@ -40,4 +40,24 @@ class MessageRepository {
     }
     return data;
   }
+
+  /// プリセット先輩を呼び出し、応答メッセージを返す。
+  Future<Message> callPersona({
+    required String chatId,
+    required String presetKey,
+  }) async {
+    final response = await _api.getMessagesApi().callPersona(
+          chatId: chatId,
+          callPersonaRequest: CallPersonaRequest(
+            (b) => b
+              ..presetKey = CallPersonaRequestPresetKeyEnum.valueOf(presetKey),
+          ),
+        );
+
+    final data = response.data;
+    if (data == null) {
+      throw Exception('先輩の呼び出しに失敗しました');
+    }
+    return data;
+  }
 }

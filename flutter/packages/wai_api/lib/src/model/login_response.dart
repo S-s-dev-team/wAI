@@ -29,11 +29,11 @@ abstract class LoginResponse implements Built<LoginResponse, LoginResponseBuilde
 
   /// メールアドレス
   @BuiltValueField(wireName: r'email')
-  String? get email;
+  String get email;
 
   /// 表示名
   @BuiltValueField(wireName: r'display_name')
-  String? get displayName;
+  String get displayName;
 
   @BuiltValueField(wireName: r'created_at')
   DateTime get createdAt;
@@ -74,20 +74,16 @@ class _$LoginResponseSerializer implements PrimitiveSerializer<LoginResponse> {
       object.firebaseUid,
       specifiedType: const FullType(String),
     );
-    if (object.email != null) {
-      yield r'email';
-      yield serializers.serialize(
-        object.email,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.displayName != null) {
-      yield r'display_name';
-      yield serializers.serialize(
-        object.displayName,
-        specifiedType: const FullType(String),
-      );
-    }
+    yield r'email';
+    yield serializers.serialize(
+      object.email,
+      specifiedType: const FullType(String),
+    );
+    yield r'display_name';
+    yield serializers.serialize(
+      object.displayName,
+      specifiedType: const FullType(String),
+    );
     yield r'created_at';
     yield serializers.serialize(
       object.createdAt,

@@ -7,6 +7,8 @@ part of 'serializers.dart';
 // **************************************************************************
 
 Serializers _$serializers = (Serializers().toBuilder()
+      ..add(CallPersonaRequest.serializer)
+      ..add(CallPersonaRequestPresetKeyEnum.serializer)
       ..add(Chat.serializer)
       ..add(CreateChatRequest.serializer)
       ..add(CreatePersonaInput.serializer)

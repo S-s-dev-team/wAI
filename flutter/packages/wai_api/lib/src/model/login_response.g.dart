@@ -12,9 +12,9 @@ class _$LoginResponse extends LoginResponse {
   @override
   final String firebaseUid;
   @override
-  final String? email;
+  final String email;
   @override
-  final String? displayName;
+  final String displayName;
   @override
   final DateTime createdAt;
   @override
@@ -26,8 +26,8 @@ class _$LoginResponse extends LoginResponse {
   _$LoginResponse._(
       {required this.id,
       required this.firebaseUid,
-      this.email,
-      this.displayName,
+      required this.email,
+      required this.displayName,
       required this.createdAt,
       required this.updatedAt})
       : super._();
@@ -141,8 +141,10 @@ class LoginResponseBuilder
           id: BuiltValueNullFieldError.checkNotNull(id, r'LoginResponse', 'id'),
           firebaseUid: BuiltValueNullFieldError.checkNotNull(
               firebaseUid, r'LoginResponse', 'firebaseUid'),
-          email: email,
-          displayName: displayName,
+          email: BuiltValueNullFieldError.checkNotNull(
+              email, r'LoginResponse', 'email'),
+          displayName: BuiltValueNullFieldError.checkNotNull(
+              displayName, r'LoginResponse', 'displayName'),
           createdAt: BuiltValueNullFieldError.checkNotNull(
               createdAt, r'LoginResponse', 'createdAt'),
           updatedAt: BuiltValueNullFieldError.checkNotNull(
