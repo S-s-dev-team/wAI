@@ -513,6 +513,27 @@ components:
         has_more:
           type: boolean
           description: さらに古いメッセージが存在するか
+      example:
+        messages:
+          - id: "11111111-1111-1111-1111-111111111111"
+            chat_id: "497f6eca-6276-4993-bfeb-53cbbbba6f08"
+            sender_type: user
+            content: "今の仕事に少し迷いがあって…毎日忙しいのですが、自分の成長が感じられなくて。"
+            created_at: "2026-03-18T12:00:00Z"
+          - id: "22222222-2222-2222-2222-222222222222"
+            chat_id: "497f6eca-6276-4993-bfeb-53cbbbba6f08"
+            sender_type: persona
+            persona:
+              id: "33333333-3333-3333-3333-333333333333"
+              persona_type: custom
+              name: "ITコンサルタント先輩"
+              gender: "男性"
+              age: 35
+              occupation: "ITコンサルタント"
+              annual_income: 800
+            content: "成長が感じられないって、具体的にはどんな場面でそう思う？日々の業務の中で何か引っかかることがあるのかな。"
+            created_at: "2026-03-18T12:00:05Z"
+        has_more: false
 
     Message:
       type: object
