@@ -45,7 +45,10 @@ func InitializeApp(ctx context.Context) (*App, error) {
 	}
 	aiRepository := repository.NewGemini(genaiClient)
 	messageUsecase := usecase.NewMessageUsecase(messageRepository, personaRepository, chatParticipantRepository, aiRepository)
-	server := handler.NewServer(authRepository, userRepository, personaRepository, login, chatUsecase, messageUsecase)
+	insightRepository := repository.NewInsight(db)
+	insightCategoryRepository := repository.NewInsightCategory(db)
+	insightUsecase := usecase.NewInsightUsecase(insightRepository, insightCategoryRepository, messageRepository, aiRepository)
+	server := handler.NewServer(authRepository, userRepository, personaRepository, login, chatUsecase, messageUsecase, insightUsecase)
 	app := &App{
 		Config: vars,
 		Server: server,
