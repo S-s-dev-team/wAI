@@ -17,6 +17,7 @@ type Server struct {
 	loginUC     *usecase.Login
 	chatUC      *usecase.ChatUsecase
 	messageUC   *usecase.MessageUsecase
+	insightUC   *usecase.InsightUsecase
 }
 
 func NewServer(
@@ -26,6 +27,7 @@ func NewServer(
 	loginUC *usecase.Login,
 	chatUC *usecase.ChatUsecase,
 	messageUC *usecase.MessageUsecase,
+	insightUC *usecase.InsightUsecase,
 ) *Server {
 	return &Server{
 		authRepo:    authRepo,
@@ -34,6 +36,7 @@ func NewServer(
 		loginUC:     loginUC,
 		chatUC:      chatUC,
 		messageUC:   messageUC,
+		insightUC:   insightUC,
 	}
 }
 

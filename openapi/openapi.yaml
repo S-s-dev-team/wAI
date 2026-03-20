@@ -233,6 +233,61 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /chats/{chatId}/analyze:
+    post:
+      summary: チャット分析
+      description: 会話を分析してインサイトを生成・保存します
+      tags:
+        - insights
+      operationId: analyzeChat
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: 分析結果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyzeChatResponse"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: チャットが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard:
+    get:
+      summary: ダッシュボード取得
+      description: ユーザーのインサイトをカテゴリ別に返します
+      tags:
+        - insights
+      operationId: getDashboard
+      responses:
+        "200":
+          description: ダッシュボード情報
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardResponse"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /health:
     get:
       summary: ヘルスチェック
@@ -488,6 +543,75 @@ components:
         created_at:
           type: string
           format: date-time
+
+    Insight:
+      type: object
+      required:
+        - id
+        - category_key
+        - category_display_name
+        - content
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        category_key:
+          type: string
+        category_display_name:
+          type: string
+        content:
+          type: string
+        chat_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+
+    AnalyzeChatResponse:
+      type: object
+      required:
+        - insights
+      properties:
+        insights:
+          type: array
+          items:
+            $ref: "#/components/schemas/Insight"
+
+    DashboardCategory:
+      type: object
+      required:
+        - category_key
+        - display_name
+        - insights
+      properties:
+        category_key:
+          type: string
+        display_name:
+          type: string
+        insights:
+          type: array
+          items:
+            $ref: "#/components/schemas/Insight"
+
+    DashboardResponse:
+      type: object
+      required:
+        - categories
+        - recent_insights
+        - total_count
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/DashboardCategory"
+        recent_insights:
+          type: array
+          items:
+            $ref: "#/components/schemas/Insight"
+        total_count:
+          type: integer
 
     HealthResponse:
       type: object

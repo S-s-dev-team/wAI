@@ -35,9 +35,12 @@ func InitializeApp(ctx context.Context) (*App, error) {
 		repository.NewMessage,
 		repository.NewChatParticipant,
 		repository.NewGemini,
+		repository.NewInsightCategory,
+		repository.NewInsight,
 		usecase.NewLogin,
 		usecase.NewChatUsecase,
 		usecase.NewMessageUsecase,
+		usecase.NewInsightUsecase,
 		handler.NewServer,
 		wire.Struct(new(App), "*"),
 	)
