@@ -38,33 +38,41 @@ wAI では「AI 先輩」というペルソナを通じて、就活生と AI が
 
 ### 通常のメッセージ送信
 
-```
-1. ユーザーがメッセージを送信
-2. システムプロンプトを構築:
-   - ペルソナの基本情報（名前、年齢、性別、職業、年収）
-   - カスタム system_prompt（設定されている場合）
-3. 過去 50 件の会話履歴を取得
-4. Gemini API (2.5-flash) に送信:
-   - SystemInstruction: システムプロンプト
-   - History: 過去の会話（user/model ロール）
-   - UserMessage: 今回のメッセージ
-5. AI の応答を DB に保存して返却
+```mermaid
+sequenceDiagram
+    actor User as ユーザー
+    participant API as Backend
+    participant DB as PostgreSQL
+    participant AI as Gemini API
+
+    User->>API: POST /chats/{chatId}/messages
+    API->>DB: ユーザーメッセージを保存
+    API->>DB: メインペルソナを取得
+    API->>DB: 過去50件の会話履歴を取得
+    API->>AI: システムプロンプト + 履歴 + メッセージ送信
+    AI-->>API: AI 応答
+    API->>DB: AI 応答を保存
+    API-->>User: ユーザーメッセージ + AI 応答
 ```
 
 ### プリセット先輩の呼び出し
 
-```
-1. ユーザーが preset_key を指定して呼び出し
-2. chat_participants にプリセット先輩を追加
-3. これまでの会話ログを構築:
-   - 「【就活生】メッセージ内容」
-   - 「【先輩名】メッセージ内容」
-4. 専用のシステムプロンプトを構築:
-   - プリセット先輩の基本 system_prompt
-   - 「別の先輩として途中参加」という指示
-   - これまでの会話ログ全文
-5. Gemini API に送信
-6. AI の応答を DB に保存して返却
+```mermaid
+sequenceDiagram
+    actor User as ユーザー
+    participant API as Backend
+    participant DB as PostgreSQL
+    participant AI as Gemini API
+
+    User->>API: POST /chats/{chatId}/call-persona
+    API->>DB: プリセット先輩を検索
+    API->>DB: chat_participants に追加
+    API->>DB: 過去50件のメッセージ取得
+    Note over API: 会話ログを構築<br/>【就活生】xxx<br/>【先輩名】xxx
+    API->>AI: 専用システムプロンプト + 会話ログ
+    AI-->>API: プリセット先輩の応答
+    API->>DB: 応答を保存
+    API-->>User: プリセット先輩の応答
 ```
 
 ## システムプロンプトの構造

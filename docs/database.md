@@ -9,23 +9,91 @@
 
 ## ER 図
 
-```
-┌──────────┐     ┌──────────────┐     ┌────────────────────┐
-│  users   │────▶│    chats     │────▶│     messages       │
-└──────────┘     └──────┬───────┘     └────────┬───────────┘
-                        │                      │
-                        │              ┌───────▼───────────┐
-                 ┌──────▼───────┐     │    personas       │
-                 │chat_participants│◀──│  (custom/preset)  │
-                 └──────────────┘     └───────┬───────────┘
-                                              │
-                                      ┌───────▼───────────┐
-                                      │   preset_keys     │
-                                      └───────────────────┘
+```mermaid
+erDiagram
+    users ||--o{ chats : "has"
+    users ||--o{ personas : "creates (custom)"
+    users ||--o{ insights : "has"
+    chats ||--o{ messages : "contains"
+    chats ||--o{ chat_participants : "has"
+    chats ||--o{ personas : "belongs to (custom)"
+    chats ||--o{ insights : "generates"
+    personas ||--o{ messages : "sends"
+    personas ||--o{ chat_participants : "joins"
+    preset_keys ||--o{ personas : "defines (preset)"
+    insight_categories ||--o{ insights : "categorizes"
 
-┌────────────────────┐     ┌──────────┐
-│ insight_categories │◀────│ insights │──▶ users, chats
-└────────────────────┘     └──────────┘
+    users {
+        UUID id PK
+        VARCHAR firebase_uid UK
+        VARCHAR email
+        VARCHAR display_name
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    chats {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR title
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    personas {
+        UUID id PK
+        UUID user_id FK
+        UUID chat_id FK
+        VARCHAR persona_type "custom | preset"
+        VARCHAR preset_key_id FK
+        VARCHAR name
+        VARCHAR gender
+        INTEGER age
+        VARCHAR occupation
+        INTEGER annual_income
+        TEXT system_prompt
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    messages {
+        UUID id PK
+        UUID chat_id FK
+        VARCHAR sender_type "user | persona"
+        UUID persona_id FK
+        TEXT content
+        TIMESTAMPTZ created_at
+    }
+
+    chat_participants {
+        UUID id PK
+        UUID chat_id FK
+        UUID persona_id FK
+        TIMESTAMPTZ joined_at
+    }
+
+    preset_keys {
+        VARCHAR id PK
+        VARCHAR label
+        TIMESTAMPTZ created_at
+        TIMESTAMPTZ updated_at
+    }
+
+    insight_categories {
+        UUID id PK
+        VARCHAR category_key UK
+        VARCHAR display_name
+        TEXT description
+    }
+
+    insights {
+        UUID id PK
+        UUID user_id FK
+        UUID chat_id FK
+        UUID category_id FK
+        TEXT content
+        TIMESTAMPTZ created_at
+    }
 ```
 
 ## テーブル定義

@@ -2,18 +2,12 @@
 
 ## システム全体構成
 
-```
-┌─────────────────┐     ┌─────────────────────┐     ┌─────────────┐
-│  Flutter App     │────▶│  Go Backend (Echo)   │────▶│ PostgreSQL  │
-│  (Web/iOS/Android)│     │  Cloud Run           │     │ Cloud SQL   │
-└─────────────────┘     └────────┬────────────┘     └─────────────┘
-                                 │
-                        ┌────────┴────────┐
-                        │                 │
-                   ┌────▼────┐     ┌──────▼──────┐
-                   │ Firebase │     │ Gemini API  │
-                   │ Auth     │     │ (2.5-flash) │
-                   └──────────┘     └─────────────┘
+```mermaid
+graph LR
+    A["Flutter App\n(Web / iOS / Android)"] -->|HTTP| B["Go Backend\n(Echo / Cloud Run)"]
+    B -->|GORM| C["PostgreSQL\n(Cloud SQL)"]
+    B -->|Admin SDK| D["Firebase Auth"]
+    B -->|REST API| E["Gemini API\n(2.5-flash)"]
 ```
 
 ## バックエンドレイヤー構成
