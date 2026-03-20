@@ -1,124 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wai_api/wai_api.dart';
+
 import '../../../constants/colors.dart';
 import '../../../constants/spacing.dart';
 import '../../../common_widgets/app_bottom_navigation.dart';
-import '../../../common_widgets/app_chip.dart';
-
-// ---------------------------------------------------------------------------
-// Data model
-// ---------------------------------------------------------------------------
-
-class ChatListItem {
-  const ChatListItem({
-    required this.id,
-    required this.name,
-    required this.role,
-    required this.preview,
-    required this.timestamp,
-    this.avatarUrl,
-    this.hasUnread = false,
-    this.isOnline = false,
-  });
-
-  final String id;
-  final String name;
-  final String role;
-  final String preview;
-  final String timestamp;
-  final String? avatarUrl;
-  final bool hasUnread;
-  final bool isOnline;
-}
+import 'chat_list_controller.dart';
 
 // ---------------------------------------------------------------------------
 // Screen
 // ---------------------------------------------------------------------------
 
-/// チャット一覧画面。
-///
-/// - AppBar: タイトル + 検索 + アバター
-/// - カテゴリチップ（横スクロール）
-/// - チャット行リスト
-/// - 「新しい相談を始める」FAB（中央下）
-/// - BottomNavigation
-class ChatListScreen extends StatefulWidget {
-  const ChatListScreen({
-    super.key,
-    this.items = const [],
-    this.categories = const ['すべて', 'IT・通信', 'マーケティング', '未読'],
-    this.onItemTap,
-    this.onNewChat,
-    this.onSearch,
-    this.onNavTap,
-    this.currentNavIndex = 0,
-  });
-
-  final List<ChatListItem> items;
-  final List<String> categories;
-  final ValueChanged<String>? onItemTap;
-  final VoidCallback? onNewChat;
-  final VoidCallback? onSearch;
-  final ValueChanged<int>? onNavTap;
-  final int currentNavIndex;
+class ChatListScreen extends ConsumerWidget {
+  const ChatListScreen({super.key});
 
   @override
-  State<ChatListScreen> createState() => _ChatListScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(chatListControllerProvider);
 
-class _ChatListScreenState extends State<ChatListScreen> {
-  int _selectedCategory = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.items.isEmpty) {
-        context.go('/create-mentor');
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.base,
-      appBar: _ChatListAppBar(onSearch: widget.onSearch),
-      body: Column(
-        children: [
-          _CategoryRow(
-            categories: widget.categories,
-            selectedIndex: _selectedCategory,
-            onSelected: (i) => setState(() => _selectedCategory = i),
-          ),
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.pagePadding,
-                vertical: AppSpacing.sm,
-              ),
-              itemCount: widget.items.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, index) {
-                final item = widget.items[index];
-                return _ChatListTile(
-                  item: item,
-                  onTap: () => widget.onItemTap?.call(item.id),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+      appBar: const _ChatListAppBar(),
+      body: _buildBody(context, ref, state),
       floatingActionButton: _NewChatFab(
-        onTap: widget.onNewChat ?? () {
-          context.push('/create-mentor');
-        },
+        onTap: () => context.push('/create-mentor'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: AppBottomNavigation(
-        currentIndex: widget.currentNavIndex,
+        currentIndex: 0,
         items: const [
           AppBottomNavItem(
             label: 'メッセージ',
@@ -137,10 +47,81 @@ class _ChatListScreenState extends State<ChatListScreen> {
           ),
         ],
         onTap: (i) {
-          widget.onNavTap?.call(i);
           if (i == 1) {
             context.push('/dashboard');
           }
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, WidgetRef ref, ChatListState state) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(state.error!, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: AppSpacing.md),
+            ElevatedButton(
+              onPressed: () =>
+                  ref.read(chatListControllerProvider.notifier).loadChats(),
+              child: const Text('再読み込み'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state.chats.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.chat_bubble_outline_rounded,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'まだチャットがありません',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              '「新しい相談を始める」から先輩を作成しましょう',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () =>
+          ref.read(chatListControllerProvider.notifier).loadChats(),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.pagePadding,
+          vertical: AppSpacing.sm,
+        ),
+        itemCount: state.chats.length,
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+        itemBuilder: (context, index) {
+          final chat = state.chats[index];
+          return _ChatListTile(
+            chat: chat,
+            onTap: () => context.push('/chat/${chat.id}'),
+          );
         },
       ),
     );
@@ -152,9 +133,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
 // ---------------------------------------------------------------------------
 
 class _ChatListAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _ChatListAppBar({this.onSearch});
-
-  final VoidCallback? onSearch;
+  const _ChatListAppBar();
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -168,10 +147,6 @@ class _ChatListAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       title: Text('チャット一覧', style: textTheme.titleMedium),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.search_rounded),
-          onPressed: onSearch,
-        ),
         Padding(
           padding: const EdgeInsets.only(right: AppSpacing.md),
           child: CircleAvatar(
@@ -190,58 +165,28 @@ class _ChatListAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Category chips row
-// ---------------------------------------------------------------------------
-
-class _CategoryRow extends StatelessWidget {
-  const _CategoryRow({
-    required this.categories,
-    required this.selectedIndex,
-    required this.onSelected,
-  });
-
-  final List<String> categories;
-  final int selectedIndex;
-  final ValueChanged<int> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 80,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.pagePadding,
-          vertical: AppSpacing.lg,
-        ),
-        itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm + 4),
-        itemBuilder: (context, index) => AppChip(
-          label: categories[index],
-          selected: selectedIndex == index,
-          onTap: () => onSelected(index),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Chat list tile
 // ---------------------------------------------------------------------------
 
 const double _kAvatarDiameter = 56.0;
 
 class _ChatListTile extends StatelessWidget {
-  const _ChatListTile({required this.item, required this.onTap});
+  const _ChatListTile({required this.chat, required this.onTap});
 
-  final ChatListItem item;
+  final Chat chat;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+
+    final name = chat.persona.name;
+    final role = chat.persona.occupation ?? '';
+    final preview = chat.lastMessage ?? '';
+    final date = chat.updatedAt;
+    final timestamp =
+        '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
 
     return Material(
       color: colorScheme.surface,
@@ -258,7 +203,15 @@ class _ChatListTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _Avatar(avatarUrl: item.avatarUrl, isOnline: item.isOnline),
+              CircleAvatar(
+                radius: _kAvatarDiameter / 2,
+                backgroundColor: colorScheme.primaryContainer,
+                child: Icon(
+                  Icons.person_rounded,
+                  size: _kAvatarDiameter * 0.5,
+                  color: colorScheme.primary,
+                ),
+              ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -273,13 +226,15 @@ class _ChatListTile extends StatelessWidget {
                             TextSpan(
                               children: [
                                 TextSpan(
-                                  text: item.name,
-                                  style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
+                                  text: name,
+                                  style: textTheme.bodyLarge
+                                      ?.copyWith(fontWeight: FontWeight.w700),
                                 ),
-                                TextSpan(
-                                  text: '  (${item.role})',
-                                  style: textTheme.bodySmall,
-                                ),
+                                if (role.isNotEmpty)
+                                  TextSpan(
+                                    text: '  ($role)',
+                                    style: textTheme.bodySmall,
+                                  ),
                               ],
                             ),
                             maxLines: 1,
@@ -288,7 +243,7 @@ class _ChatListTile extends StatelessWidget {
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Text(
-                          item.timestamp,
+                          timestamp,
                           style: textTheme.bodySmall?.copyWith(
                             color: AppColors.textTertiary,
                           ),
@@ -296,21 +251,11 @@ class _ChatListTile extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xs),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            item.preview,
-                            style: textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (item.hasUnread) ...[
-                          const SizedBox(width: AppSpacing.sm),
-                          _UnreadDot(),
-                        ],
-                      ],
+                    Text(
+                      preview,
+                      style: textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -318,76 +263,6 @@ class _ChatListTile extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Avatar with optional online indicator
-// ---------------------------------------------------------------------------
-
-class _Avatar extends StatelessWidget {
-  const _Avatar({this.avatarUrl, required this.isOnline});
-
-  final String? avatarUrl;
-  final bool isOnline;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        CircleAvatar(
-          radius: _kAvatarDiameter / 2,
-          backgroundColor: colorScheme.primaryContainer,
-          backgroundImage:
-              avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-          child: avatarUrl == null
-              ? Icon(
-                  Icons.person_rounded,
-                  size: _kAvatarDiameter * 0.5,
-                  color: colorScheme.primary,
-                )
-              : null,
-        ),
-        if (isOnline)
-          Positioned(
-            bottom: 1,
-            right: 1,
-            child: Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: _kOnlineColor,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colorScheme.surface,
-                  width: 2,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Unread dot
-// ---------------------------------------------------------------------------
-
-class _UnreadDot extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        shape: BoxShape.circle,
       ),
     );
   }
@@ -426,10 +301,3 @@ class _NewChatFab extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-
-/// オンラインインジケーターの色。
-const Color _kOnlineColor = AppColors.success;
