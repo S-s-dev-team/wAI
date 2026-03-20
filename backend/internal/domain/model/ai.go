@@ -8,6 +8,7 @@ type ChatMessage struct {
 }
 
 type AIRequest struct {
+	Model        string // モデル名（空の場合はデフォルトを使用）
 	SystemPrompt string
 	History      []ChatMessage
 	UserMessage  string

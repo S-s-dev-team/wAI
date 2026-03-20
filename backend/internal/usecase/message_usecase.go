@@ -99,6 +99,7 @@ func (u *MessageUsecase) Send(ctx context.Context, input SendMessageInput) (*Sen
 
 	// AIにリクエスト送信
 	aiResp, err := u.aiRepository.SendMessage(ctx, &domain.AIRequest{
+		Model:        "gemini-3.1-pro-preview",
 		SystemPrompt: systemPrompt,
 		History:      history,
 		UserMessage:  input.Content,
@@ -197,6 +198,7 @@ func (u *MessageUsecase) CallPersona(ctx context.Context, input CallPersonaInput
 		"--- これまでの会話ログ ---\n" + conversationLog
 
 	aiResp, err := u.aiRepository.SendMessage(ctx, &domain.AIRequest{
+		Model:        "gemini-3.1-pro-preview",
 		SystemPrompt: systemPrompt,
 		History:      nil,
 		UserMessage:  "会話を読んだ上で、あなたの立場からアドバイスをお願いします。",
@@ -242,7 +244,6 @@ func (u *MessageUsecase) List(ctx context.Context, input ListMessagesInput) (*Li
 	}, nil
 }
 
-// TODO)seba)
 func buildSystemPrompt(persona *domain.Persona) string {
 	age := 0
 	if persona.Age != nil {
@@ -262,14 +263,15 @@ func buildSystemPrompt(persona *domain.Persona) string {
 	}
 
 	prompt := fmt.Sprintf(
-		"あなたは「%s」という名前の先輩です。"+
-			"年齢: %d歳、性別: %s、職業: %s、年収: %d万円。"+
-			"この人物になりきって、後輩に対してアドバイスや会話をしてください。"+
-			"フレンドリーで親しみやすい口調で話してください。",
-		persona.Name, age, gender, occupation, annualIncome,
+		"あなたは「%s」という名前の、就活を終えた社会人の先輩です。\n"+
+			"年齢: %d歳、性別: %s、職業: %s、年収: %d万円。\n"+
+			"%s\n"+
+			"## 会話のルール\n"+
+			"- 先輩として親しみやすく、でも敬語は崩しすぎない\n"+
+			"- 一方的にアドバイスするだけでなく、後輩の考えを引き出す質問を必ず1つ含める\n"+
+			"- 抽象的な正論ではなく、自分の実体験に基づいて話す（架空でOK）\n"+
+			"- 短い相談には100字以内で、詳しい相談には200字程度で返す",
+		persona.Name, age, gender, occupation, annualIncome, persona.SystemPrompt,
 	)
-	if persona.SystemPrompt != "" {
-		prompt += "\n追加の指示: " + persona.SystemPrompt
-	}
 	return prompt
 }

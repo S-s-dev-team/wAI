@@ -95,27 +95,30 @@ func (u *InsightUsecase) Analyze(ctx context.Context, userID uuid.UUID, chatID u
 	}
 
 	// 4. Geminiに分析リクエスト
-	systemPrompt := `あなたは就活生の自己分析を支援するアナリストです。
-以下のチャット会話を分析し、就活生の特徴をJSON形式で抽出してください。
+	systemPrompt := `以下の会話ログを分析し、就活生に関するインサイトをJSON形式で抽出してください。
 
-カテゴリ:
-- values（価値観）: 仕事や人生において大切にしていること
-- strengths（強み）: 自分の得意なこと・優れている点
-- interests（興味・関心）: 興味を持っている分野やテーマ
+## カテゴリ一覧
+- values: 価値観（仕事や人生で大切にしていること）
+- strengths: 強み（得意なこと・優れている点）
+- interests: 興味・関心（興味を持っている分野やテーマ）
 
-出力形式（JSON）:
-{"insights": [{"category_key": "values", "content": "..."}, ...]}
+## 抽出ルール
+- 就活生の発言から読み取れる内容のみを抽出する（先輩の発言は参考程度）
+- 明示的な発言だけでなく、言葉の端々から推測できる内容も含める
+- 1カテゴリに複数のインサイトがある場合は複数エントリーとして出力する
+- 抽出根拠が薄いものは含めない
+- contentは簡潔に1〜2文で記述する
 
-注意:
-- 各カテゴリ0〜3件程度
-- 会話から読み取れるものだけ。推測は最小限に
-- content は簡潔な日本語で（1〜2文）
-- JSON以外のテキストは出力しないでください`
+## 出力形式
+必ず以下のJSONのみを出力してください。説明文やマークダウンは不要です。
+抽出できるインサイトがないカテゴリは含めないでください。
+{"insights": [{"category_key": "カテゴリキー", "content": "インサイトの内容"}, ...]}`
 
 	aiResp, err := u.aiRepo.SendMessage(ctx, &domain.AIRequest{
+		Model:        "gemini-3.1-flash-lite-preview",
 		SystemPrompt: systemPrompt,
 		History:      nil,
-		UserMessage:  "以下の会話を分析してください:\n\n" + conversationLog.String(),
+		UserMessage:  "## 会話ログ\n" + conversationLog.String(),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to analyze with AI: %w", err)

@@ -18,7 +18,11 @@ func NewGemini(client *genai.Client) domain.AIRepository {
 }
 
 func (r *Gemini) SendMessage(ctx context.Context, req *domain.AIRequest) (*domain.AIResponse, error) {
-	model := r.client.GenerativeModel("gemini-2.5-flash")
+	modelName := "gemini-2.5-flash"
+	if req.Model != "" {
+		modelName = req.Model
+	}
+	model := r.client.GenerativeModel(modelName)
 	model.SystemInstruction = &genai.Content{
 		Parts: []genai.Part{genai.Text(req.SystemPrompt)},
 	}
