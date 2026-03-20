@@ -34,6 +34,8 @@ func main() {
 		&domain.Persona{},
 		&domain.ChatParticipant{},
 		&domain.Message{},
+		&domain.InsightCategory{},
+		&domain.Insight{},
 	); err != nil {
 		log.Fatalf("failed to migrate: %v", err)
 	}
@@ -52,6 +54,18 @@ func main() {
 }
 
 func seedData(db *gorm.DB) {
+	// InsightCategories
+	insightCategories := []domain.InsightCategory{
+		{CategoryKey: "values", DisplayName: "価値観", Description: strPtr("仕事や人生において大切にしていること")},
+		{CategoryKey: "strengths", DisplayName: "強み", Description: strPtr("自分の得意なこと・優れている点")},
+		{CategoryKey: "weaknesses", DisplayName: "弱み", Description: strPtr("自分の苦手なこと・改善が必要な点")},
+		{CategoryKey: "suitable_jobs", DisplayName: "向いている職種", Description: strPtr("適性があると考えられる仕事・職種")},
+		{CategoryKey: "interests", DisplayName: "興味・関心", Description: strPtr("興味を持っている分野やテーマ")},
+	}
+	for _, ic := range insightCategories {
+		db.Where("category_key = ?", ic.CategoryKey).FirstOrCreate(&ic)
+	}
+
 	// PresetKeys
 	presetKeys := []domain.PresetKey{
 		{ID: "yarigai", Label: "やりがい重視"},
@@ -92,4 +106,8 @@ func seedData(db *gorm.DB) {
 			})
 		}
 	}
+}
+
+func strPtr(s string) *string {
+	return &s
 }
