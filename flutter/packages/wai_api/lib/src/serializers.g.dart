@@ -7,14 +7,18 @@ part of 'serializers.dart';
 // **************************************************************************
 
 Serializers _$serializers = (Serializers().toBuilder()
+      ..add(AnalyzeChatResponse.serializer)
       ..add(CallPersonaRequest.serializer)
       ..add(CallPersonaRequestPresetKeyEnum.serializer)
       ..add(Chat.serializer)
       ..add(CreateChatRequest.serializer)
       ..add(CreatePersonaInput.serializer)
+      ..add(DashboardCategory.serializer)
+      ..add(DashboardResponse.serializer)
       ..add(ErrorResponse.serializer)
       ..add(HealthResponse.serializer)
       ..add(HealthResponseStatusEnum.serializer)
+      ..add(Insight.serializer)
       ..add(LoginResponse.serializer)
       ..add(Message.serializer)
       ..add(MessageList.serializer)
@@ -23,6 +27,18 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(PersonaPersonaTypeEnum.serializer)
       ..add(SendMessageRequest.serializer)
       ..add(SendMessageResponse.serializer)
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(DashboardCategory)]),
+          () => ListBuilder<DashboardCategory>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Insight)]),
+          () => ListBuilder<Insight>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Insight)]),
+          () => ListBuilder<Insight>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Insight)]),
+          () => ListBuilder<Insight>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Message)]),
           () => ListBuilder<Message>())
