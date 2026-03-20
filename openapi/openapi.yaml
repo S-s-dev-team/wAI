@@ -187,6 +187,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /chats/{chatId}/call-persona:
+    post:
+      summary: プリセット先輩を呼ぶ
+      description: プリセット先輩をチャットに呼び出し、過去の会話を読んだ上で別視点のアドバイスを返します
+      tags:
+        - messages
+      operationId: callPersona
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CallPersonaRequest"
+      responses:
+        "201":
+          description: プリセット先輩の応答
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: リクエスト不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: チャットまたはプリセット先輩が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /health:
     get:
       summary: ヘルスチェック
@@ -362,6 +408,18 @@ components:
         annual_income:
           type: integer
           description: 年収（万円）
+
+    CallPersonaRequest:
+      type: object
+      required:
+        - preset_key
+      properties:
+        preset_key:
+          type: string
+          description: プリセット先輩のキー
+          enum:
+            - yarigai
+            - nenshu
 
     SendMessageRequest:
       type: object

@@ -78,19 +78,8 @@ func (s *Server) ListChats(ctx echo.Context) error {
 			UpdatedAt: c.UpdatedAt,
 		}
 		if p, ok := output.Personas[c.ID]; ok {
-			age := p.Age
-			income := p.AnnualIncome
-			gender := p.Gender
-			occupation := p.Occupation
-			chat.Persona = api.Persona{
-				Id:           openapi_types.UUID(p.ID),
-				Name:         p.Name,
-				PersonaType:  api.PersonaPersonaType(p.PersonaType),
-				Age:          &age,
-				AnnualIncome: &income,
-				Gender:       &gender,
-				Occupation:   &occupation,
-			}
+			resp := personaToResponse(p)
+			chat.Persona = resp
 		}
 		chats[i] = chat
 	}
@@ -107,19 +96,7 @@ func chatToResponse(output *usecase.ChatOutput) api.Chat {
 		UpdatedAt: output.Chat.UpdatedAt,
 	}
 	if output.Persona != nil {
-		age := output.Persona.Age
-		income := output.Persona.AnnualIncome
-		gender := output.Persona.Gender
-		occupation := output.Persona.Occupation
-		chat.Persona = api.Persona{
-			Id:           openapi_types.UUID(output.Persona.ID),
-			Name:         output.Persona.Name,
-			PersonaType:  api.PersonaPersonaType(output.Persona.PersonaType),
-			Age:          &age,
-			AnnualIncome: &income,
-			Gender:       &gender,
-			Occupation:   &occupation,
-		}
+		chat.Persona = personaToResponse(output.Persona)
 	}
 	return chat
 }

@@ -8,11 +8,12 @@ import (
 )
 
 type Message struct {
-	ID         uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
-	ChatID     uuid.UUID `gorm:"type:uuid;not null;index"`
-	SenderType string    `gorm:"not null"` // "user" or "persona"
-	Content    string    `gorm:"not null"`
-	CreatedAt  time.Time `gorm:"autoCreateTime"`
+	ID         uuid.UUID  `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"`
+	ChatID     uuid.UUID  `gorm:"type:uuid;not null;index"`
+	SenderType string     `gorm:"type:varchar(10);not null"` // "user" or "persona"
+	PersonaID  *uuid.UUID `gorm:"type:uuid"`
+	Content    string     `gorm:"type:text;not null"`
+	CreatedAt  time.Time  `gorm:"autoCreateTime"`
 }
 
 type MessageRepository interface {

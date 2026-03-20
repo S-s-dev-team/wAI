@@ -33,6 +33,7 @@ func InitializeApp(ctx context.Context) (*App, error) {
 		repository.NewChat,
 		repository.NewPersona,
 		repository.NewMessage,
+		repository.NewChatParticipant,
 		repository.NewGemini,
 		usecase.NewLogin,
 		usecase.NewChatUsecase,
