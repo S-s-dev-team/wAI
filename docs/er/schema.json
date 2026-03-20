@@ -1,0 +1,1165 @@
+{
+  "name": "app",
+  "tables": [
+    {
+      "name": "public.users",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "firebase_uid",
+          "type": "varchar(128)",
+          "nullable": false
+        },
+        {
+          "name": "email",
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        {
+          "name": "display_name",
+          "type": "varchar(100)",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "users_pkey",
+          "def": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)",
+          "table": "public.users",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "users_firebase_uid_key",
+          "def": "CREATE UNIQUE INDEX users_firebase_uid_key ON public.users USING btree (firebase_uid)",
+          "table": "public.users",
+          "columns": [
+            "firebase_uid"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "users_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "users_firebase_uid_key",
+          "type": "UNIQUE",
+          "def": "UNIQUE (firebase_uid)",
+          "table": "public.users",
+          "referenced_table": "",
+          "columns": [
+            "firebase_uid"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.preset_keys",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "varchar(50)",
+          "nullable": false
+        },
+        {
+          "name": "label",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "preset_keys_pkey",
+          "def": "CREATE UNIQUE INDEX preset_keys_pkey ON public.preset_keys USING btree (id)",
+          "table": "public.preset_keys",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "preset_keys_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.preset_keys",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.personas",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "chat_id",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "persona_type",
+          "type": "varchar(10)",
+          "nullable": false
+        },
+        {
+          "name": "preset_key_id",
+          "type": "varchar(50)",
+          "nullable": true
+        },
+        {
+          "name": "name",
+          "type": "varchar(100)",
+          "nullable": false
+        },
+        {
+          "name": "gender",
+          "type": "varchar(20)",
+          "nullable": true
+        },
+        {
+          "name": "age",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "occupation",
+          "type": "varchar(100)",
+          "nullable": true
+        },
+        {
+          "name": "annual_income",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "system_prompt",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "personas_pkey",
+          "def": "CREATE UNIQUE INDEX personas_pkey ON public.personas USING btree (id)",
+          "table": "public.personas",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "check_custom_has_user",
+          "type": "CHECK",
+          "def": "CHECK ((((persona_type)::text = 'preset'::text) OR (user_id IS NOT NULL)))",
+          "table": "public.personas",
+          "referenced_table": "",
+          "columns": [
+            "persona_type",
+            "user_id"
+          ]
+        },
+        {
+          "name": "check_preset_has_key",
+          "type": "CHECK",
+          "def": "CHECK ((((persona_type)::text = 'custom'::text) OR (preset_key_id IS NOT NULL)))",
+          "table": "public.personas",
+          "referenced_table": "",
+          "columns": [
+            "persona_type",
+            "preset_key_id"
+          ]
+        },
+        {
+          "name": "personas_persona_type_check",
+          "type": "CHECK",
+          "def": "CHECK (((persona_type)::text = ANY ((ARRAY['custom'::character varying, 'preset'::character varying])::text[])))",
+          "table": "public.personas",
+          "referenced_table": "",
+          "columns": [
+            "persona_type"
+          ]
+        },
+        {
+          "name": "personas_user_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE",
+          "table": "public.personas",
+          "referenced_table": "users",
+          "columns": [
+            "user_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "personas_preset_key_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (preset_key_id) REFERENCES preset_keys(id)",
+          "table": "public.personas",
+          "referenced_table": "preset_keys",
+          "columns": [
+            "preset_key_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "personas_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.personas",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "fk_personas_chat",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE",
+          "table": "public.personas",
+          "referenced_table": "chats",
+          "columns": [
+            "chat_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.chats",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "title",
+          "type": "varchar(200)",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "chats_pkey",
+          "def": "CREATE UNIQUE INDEX chats_pkey ON public.chats USING btree (id)",
+          "table": "public.chats",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "idx_chats_user_id",
+          "def": "CREATE INDEX idx_chats_user_id ON public.chats USING btree (user_id)",
+          "table": "public.chats",
+          "columns": [
+            "user_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "chats_user_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE",
+          "table": "public.chats",
+          "referenced_table": "users",
+          "columns": [
+            "user_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "chats_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.chats",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.chat_participants",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "chat_id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "persona_id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "joined_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "chat_participants_pkey",
+          "def": "CREATE UNIQUE INDEX chat_participants_pkey ON public.chat_participants USING btree (id)",
+          "table": "public.chat_participants",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "chat_participants_chat_id_persona_id_key",
+          "def": "CREATE UNIQUE INDEX chat_participants_chat_id_persona_id_key ON public.chat_participants USING btree (chat_id, persona_id)",
+          "table": "public.chat_participants",
+          "columns": [
+            "chat_id",
+            "persona_id"
+          ]
+        },
+        {
+          "name": "idx_chat_participants_chat",
+          "def": "CREATE INDEX idx_chat_participants_chat ON public.chat_participants USING btree (chat_id)",
+          "table": "public.chat_participants",
+          "columns": [
+            "chat_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "chat_participants_persona_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE CASCADE",
+          "table": "public.chat_participants",
+          "referenced_table": "personas",
+          "columns": [
+            "persona_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "chat_participants_chat_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE",
+          "table": "public.chat_participants",
+          "referenced_table": "chats",
+          "columns": [
+            "chat_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "chat_participants_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.chat_participants",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "chat_participants_chat_id_persona_id_key",
+          "type": "UNIQUE",
+          "def": "UNIQUE (chat_id, persona_id)",
+          "table": "public.chat_participants",
+          "referenced_table": "",
+          "columns": [
+            "chat_id",
+            "persona_id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.messages",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "chat_id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "sender_type",
+          "type": "varchar(10)",
+          "nullable": false
+        },
+        {
+          "name": "persona_id",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "messages_pkey",
+          "def": "CREATE UNIQUE INDEX messages_pkey ON public.messages USING btree (id)",
+          "table": "public.messages",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "idx_messages_chat_id",
+          "def": "CREATE INDEX idx_messages_chat_id ON public.messages USING btree (chat_id)",
+          "table": "public.messages",
+          "columns": [
+            "chat_id"
+          ]
+        },
+        {
+          "name": "idx_messages_created_at",
+          "def": "CREATE INDEX idx_messages_created_at ON public.messages USING btree (chat_id, created_at)",
+          "table": "public.messages",
+          "columns": [
+            "chat_id",
+            "created_at"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "check_persona_sender",
+          "type": "CHECK",
+          "def": "CHECK ((((sender_type)::text = 'user'::text) OR (persona_id IS NOT NULL)))",
+          "table": "public.messages",
+          "referenced_table": "",
+          "columns": [
+            "sender_type",
+            "persona_id"
+          ]
+        },
+        {
+          "name": "messages_sender_type_check",
+          "type": "CHECK",
+          "def": "CHECK (((sender_type)::text = ANY ((ARRAY['user'::character varying, 'persona'::character varying])::text[])))",
+          "table": "public.messages",
+          "referenced_table": "",
+          "columns": [
+            "sender_type"
+          ]
+        },
+        {
+          "name": "messages_persona_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE SET NULL",
+          "table": "public.messages",
+          "referenced_table": "personas",
+          "columns": [
+            "persona_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "messages_chat_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE",
+          "table": "public.messages",
+          "referenced_table": "chats",
+          "columns": [
+            "chat_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "messages_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.messages",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.insight_categories",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "category_key",
+          "type": "varchar(50)",
+          "nullable": false
+        },
+        {
+          "name": "display_name",
+          "type": "varchar(50)",
+          "nullable": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        }
+      ],
+      "indexes": [
+        {
+          "name": "insight_categories_pkey",
+          "def": "CREATE UNIQUE INDEX insight_categories_pkey ON public.insight_categories USING btree (id)",
+          "table": "public.insight_categories",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "insight_categories_category_key_key",
+          "def": "CREATE UNIQUE INDEX insight_categories_category_key_key ON public.insight_categories USING btree (category_key)",
+          "table": "public.insight_categories",
+          "columns": [
+            "category_key"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "insight_categories_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.insight_categories",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "insight_categories_category_key_key",
+          "type": "UNIQUE",
+          "def": "UNIQUE (category_key)",
+          "table": "public.insight_categories",
+          "referenced_table": "",
+          "columns": [
+            "category_key"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public.insights",
+      "type": "BASE TABLE",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "nullable": false,
+          "default": "gen_random_uuid()"
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "chat_id",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "category_id",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "insights_pkey",
+          "def": "CREATE UNIQUE INDEX insights_pkey ON public.insights USING btree (id)",
+          "table": "public.insights",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "idx_insights_user_id",
+          "def": "CREATE INDEX idx_insights_user_id ON public.insights USING btree (user_id)",
+          "table": "public.insights",
+          "columns": [
+            "user_id"
+          ]
+        },
+        {
+          "name": "idx_insights_category_id",
+          "def": "CREATE INDEX idx_insights_category_id ON public.insights USING btree (category_id)",
+          "table": "public.insights",
+          "columns": [
+            "category_id"
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "name": "insights_user_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE",
+          "table": "public.insights",
+          "referenced_table": "users",
+          "columns": [
+            "user_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "insights_chat_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE SET NULL",
+          "table": "public.insights",
+          "referenced_table": "chats",
+          "columns": [
+            "chat_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "insights_category_id_fkey",
+          "type": "FOREIGN KEY",
+          "def": "FOREIGN KEY (category_id) REFERENCES insight_categories(id)",
+          "table": "public.insights",
+          "referenced_table": "insight_categories",
+          "columns": [
+            "category_id"
+          ],
+          "referenced_columns": [
+            "id"
+          ]
+        },
+        {
+          "name": "insights_pkey",
+          "type": "PRIMARY KEY",
+          "def": "PRIMARY KEY (id)",
+          "table": "public.insights",
+          "referenced_table": "",
+          "columns": [
+            "id"
+          ]
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "table": "public.personas",
+      "columns": [
+        "user_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.users",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "zero_or_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.personas",
+      "columns": [
+        "preset_key_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.preset_keys",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "zero_or_one",
+      "def": "FOREIGN KEY (preset_key_id) REFERENCES preset_keys(id)"
+    },
+    {
+      "table": "public.personas",
+      "columns": [
+        "chat_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.chats",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "zero_or_one",
+      "def": "FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.chats",
+      "columns": [
+        "user_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.users",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.chat_participants",
+      "columns": [
+        "persona_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.personas",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.chat_participants",
+      "columns": [
+        "chat_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.chats",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.messages",
+      "columns": [
+        "persona_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.personas",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "zero_or_one",
+      "def": "FOREIGN KEY (persona_id) REFERENCES personas(id) ON DELETE SET NULL"
+    },
+    {
+      "table": "public.messages",
+      "columns": [
+        "chat_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.chats",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.insights",
+      "columns": [
+        "user_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.users",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    {
+      "table": "public.insights",
+      "columns": [
+        "chat_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.chats",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "zero_or_one",
+      "def": "FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE SET NULL"
+    },
+    {
+      "table": "public.insights",
+      "columns": [
+        "category_id"
+      ],
+      "cardinality": "zero_or_more",
+      "parent_table": "public.insight_categories",
+      "parent_columns": [
+        "id"
+      ],
+      "parent_cardinality": "exactly_one",
+      "def": "FOREIGN KEY (category_id) REFERENCES insight_categories(id)"
+    }
+  ],
+  "functions": [
+    {
+      "name": "public.digest",
+      "return_type": "bytea",
+      "arguments": "text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.digest",
+      "return_type": "bytea",
+      "arguments": "bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.hmac",
+      "return_type": "bytea",
+      "arguments": "text, text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.hmac",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.crypt",
+      "return_type": "text",
+      "arguments": "text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.gen_salt",
+      "return_type": "text",
+      "arguments": "text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.gen_salt",
+      "return_type": "text",
+      "arguments": "text, integer",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.encrypt",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.decrypt",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.encrypt_iv",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.decrypt_iv",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.gen_random_bytes",
+      "return_type": "bytea",
+      "arguments": "integer",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.gen_random_uuid",
+      "return_type": "uuid",
+      "arguments": "",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_sym_encrypt",
+      "return_type": "bytea",
+      "arguments": "text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_sym_encrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_sym_encrypt",
+      "return_type": "bytea",
+      "arguments": "text, text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_sym_encrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_sym_decrypt",
+      "return_type": "text",
+      "arguments": "bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_sym_decrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_sym_decrypt",
+      "return_type": "text",
+      "arguments": "bytea, text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_sym_decrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_encrypt",
+      "return_type": "bytea",
+      "arguments": "text, bytea",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_encrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_encrypt",
+      "return_type": "bytea",
+      "arguments": "text, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_encrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_decrypt",
+      "return_type": "text",
+      "arguments": "bytea, bytea",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_decrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_decrypt",
+      "return_type": "text",
+      "arguments": "bytea, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_decrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_decrypt",
+      "return_type": "text",
+      "arguments": "bytea, bytea, text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_pub_decrypt_bytea",
+      "return_type": "bytea",
+      "arguments": "bytea, bytea, text, text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_key_id",
+      "return_type": "text",
+      "arguments": "bytea",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.armor",
+      "return_type": "text",
+      "arguments": "bytea",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.armor",
+      "return_type": "text",
+      "arguments": "bytea, text[], text[]",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.dearmor",
+      "return_type": "bytea",
+      "arguments": "text",
+      "type": "FUNCTION"
+    },
+    {
+      "name": "public.pgp_armor_headers",
+      "return_type": "record",
+      "arguments": "text, OUT key text, OUT value text",
+      "type": "FUNCTION"
+    }
+  ],
+  "driver": {
+    "name": "postgres",
+    "database_version": "PostgreSQL 16.13 (Debian 16.13-1.pgdg13+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "meta": {
+      "current_schema": "public",
+      "search_paths": [
+        "postgres",
+        "public"
+      ],
+      "dict": {
+        "Functions": "Stored procedures and functions"
+      }
+    }
+  }
+}
