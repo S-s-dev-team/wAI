@@ -357,7 +357,10 @@ class _InterestsSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
-                      Text(insight.content, style: textTheme.bodyMedium),
+                      Flexible(
+                        child: Text(insight.content,
+                            style: textTheme.bodyMedium),
+                      ),
                     ],
                   ),
                 );
