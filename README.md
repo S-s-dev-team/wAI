@@ -14,7 +14,9 @@
 
 ## デモ
 
-> 🚧 Coming soon
+[![デモ動画](https://img.youtube.com/vi/yeWygS0AnB8/maxresdefault.jpg)](https://youtu.be/yeWygS0AnB8?si=GhpB6qmN84cpOdGq)
+
+> 🎬 画像をクリックするとYouTubeでデモ動画が再生されます
 
 ---
 
